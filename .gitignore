@@ -9,6 +9,7 @@ setup.cfg
 *.sql
 .eggs
 .coverage
+web/node_modules
 /site
 /secrets/*.env
 /secrets/*.yaml
