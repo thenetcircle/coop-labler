@@ -11,7 +11,7 @@ import traceback
 
 def op_create(app: AppSession, args):
     if len(args) == 0:
-        raise errors.FatalException('no name specified when creating project')
+        raise errors.FatalException('no project name specified')
 
     name = args[0]
     if env.db.project_exists(name):
@@ -26,7 +26,7 @@ def op_create(app: AppSession, args):
 
 def op_update(app: AppSession, args):
     if len(args) == 0:
-        raise errors.FatalException('no name specified when updating project')
+        raise errors.FatalException('no project name specified')
 
     name = args[0]
     if not env.db.project_exists(name):
@@ -39,9 +39,50 @@ def op_update(app: AppSession, args):
         env.db.update_project(name, app)
 
 
+def op_projects(app: AppSession, _):
+    app.printer.action(f'listing projects')
+    projects = env.db.get_projects()
+
+    app.printer.blanknotice('')
+    header = 'project name\tproject type\tclasses\tdirectory'.expandtabs(tabsize=20)
+    app.printer.blanknotice(header)
+    app.printer.blanknotice('-' * len(header))
+
+    for project in projects:
+        pname = project['project_name']
+        ptype = project['project_type']
+        pcls = project['classes']
+        pdir = project['directory']
+
+        app.printer.blanknotice(
+            f'{pname} \t{ptype} \t{pcls} \t{pdir}'.expandtabs(tabsize=20))
+
+
+def op_claims(app: AppSession, args):
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
+
+    name = args[0]
+    if not env.db.project_exists(name):
+        raise FatalException(f'no project exist with name {name}')
+
+    app.printer.action(f'listing claims for project {name}')
+    claims = env.db.get_claims(name)
+
+    app.printer.blanknotice('')
+    header = 'file name\tclaimed by\tclaimed at'.expandtabs(tabsize=20)
+    app.printer.blanknotice(header)
+    app.printer.blanknotice('-' * len(header))
+
+    for claim in claims:
+        app.printer.blanknotice(
+            f'{claim["file_name"]}\t{claim["claimed_by"]}\t{claim["claimed_at"]}'.expandtabs(tabsize=20))
+
+
 def main(app):
     if len(app.args) < 1:
-        raise errors.FatalException('To few arguments')
+        print(opts.usage())
+        return 0
 
     if app.args[0] in 'help':
         print(opts.usage())
@@ -52,6 +93,12 @@ def main(app):
 
     elif app.args[0] == 'update':
         op.operate(app, op_update)
+
+    elif app.args[0] == 'projects':
+        op.operate(app, op_projects)
+
+    elif app.args[0] == 'claims':
+        op.operate(app, op_claims)
 
     else:
         app.printer.error(f'unknown operation {app.args[0]}')

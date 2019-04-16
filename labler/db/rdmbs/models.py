@@ -25,7 +25,7 @@ class Projects(DeclarativeBase):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column('name', String(128), nullable=False, index=True, unique=True)
+    project_name = Column('name', String(128), nullable=False, index=True, unique=True)
     directory = Column('directory', String(128), nullable=True, index=False, unique=False)
     created = Column('created', DateTime, nullable=False, server_default=utcnow())
     project_type = Column('project_type', String(32), nullable=False, server_default='classification')
@@ -42,8 +42,8 @@ class Claims(DeclarativeBase):
     file_name = Column('file_name', String(256), nullable=False, index=True, unique=False)
 
     project_name = Column('project_name', String(256), nullable=False, index=True, unique=False)
-    claim_time = Column('claim_time', DateTime, nullable=False, server_default=utcnow())
-    claim_user = Column('claim_user', String(128), nullable=False, index=True, unique=False)
+    claimed_at = Column('claimed_at', DateTime, nullable=False, server_default=utcnow())
+    claimed_by = Column('claimed_by', String(128), nullable=False, index=True, unique=False)
 
 
 class Labels(DeclarativeBase):

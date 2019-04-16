@@ -135,10 +135,14 @@ def usage():
                 Specify the type of project, one of [{project_types}]
 
         Operations:
-            create [name]
+            create <project name>
                 Create a new project
-            update [name]
+            update <project name>
                 Update an existing project
+            claims <project name>
+                List claims for a project
+            projects
+                List information about all projects
             help
                 Show the help text and exit.
     """.format(
