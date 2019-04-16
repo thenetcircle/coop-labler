@@ -23,9 +23,9 @@ LambdaTemplate = {
     'pretend': False,
     'silent': False,
     'verbose': True,
-    'classes': 2,
-    'project_type': 'classification',
-    'directory': '',
+    'classes': None,
+    'project_type': None,
+    'directory': None,
 }
 
 

@@ -24,6 +24,21 @@ def op_create(app: AppSession, args):
         env.db.create_project(name, app)
 
 
+def op_update(app: AppSession, args):
+    if len(args) == 0:
+        raise errors.FatalException('no name specified when updating project')
+
+    name = args[0]
+    if not env.db.project_exists(name):
+        raise FatalException(f'no project exist with name {name}')
+
+    if app.lambdaenv.pretend:
+        app.printer.notice(f'would update existing project called {name}')
+    else:
+        app.printer.action(f'updating project: {name}')
+        env.db.update_project(name, app)
+
+
 def main(app):
     if len(app.args) < 1:
         raise errors.FatalException('To few arguments')
@@ -34,6 +49,13 @@ def main(app):
 
     elif app.args[0] == 'create':
         op.operate(app, op_create)
+
+    elif app.args[0] == 'update':
+        op.operate(app, op_update)
+
+    else:
+        app.printer.error(f'unknown operation {app.args[0]}')
+        sys.exit(1)
 
     return 0
 
