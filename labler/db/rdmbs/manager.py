@@ -36,6 +36,7 @@ class DatabaseRdbms(IDatabase):
         project.name = name
         project.classes = app.lambdaenv.classes
         project.project_type = app.lambdaenv.project_type
+        project.directory = app.lambdaenv.directory
 
         session.add(project)
         session.commit()

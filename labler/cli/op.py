@@ -14,3 +14,4 @@ def operate(app: AppSession, call):
     except Exception as e:
         app.printer.error(str(e))
         print(traceback.format_exc())
+        sys.exit(1)

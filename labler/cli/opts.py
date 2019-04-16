@@ -24,7 +24,8 @@ LambdaTemplate = {
     'silent': False,
     'verbose': True,
     'classes': 2,
-    'project_type': 'classification'
+    'project_type': 'classification',
+    'directory': '',
 }
 
 
@@ -33,7 +34,7 @@ class AppSession:
         try:
             opts, argv = getopt.gnu_getopt(
                 argv,
-                'pVsvhc:t:',
+                'pVsvhc:t:d:',
                 [
                     'pretend',
                     'version',
@@ -41,7 +42,8 @@ class AppSession:
                     'verbose',
                     'help',
                     'classes=',
-                    'type='
+                    'type=',
+                    'directory=',
                 ]
             )
 
@@ -72,6 +74,9 @@ class AppSession:
             elif opt in ('-s', '--silent'):
                 self.lambdaenv.silent = True
                 self.lambdaenv.suppressed = {'all'}
+
+            elif opt in ('-d', '--directory'):
+                self.lambdaenv.directory = arg
 
             elif opt in ('-v', '--verbose'):
                 self.lambdaenv.verbose = True
@@ -124,12 +129,16 @@ def usage():
                 Makes labler more talkative.
             --classes (or -c):
                 Specify how many classes a project has.
+            --dir (or -d):
+                Specify where the training data exists for this project (local fs only a of now) 
             --type (or -t):
                 Specify the type of project, one of [{project_types}]
 
         Operations:
             create [name]
                 Create a new project
+            update [name]
+                Update an existing project
             help
                 Show the help text and exit.
     """.format(
