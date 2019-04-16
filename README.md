@@ -4,6 +4,8 @@ Cooperative labeling of training data.
 
 ## CLI tool to create/manage projects
 
+For more details, see [README](labler/cli/README.md) in cli project.
+
     labler - Cooperative labeling of images
     Usage: labler [option(s)] <operation [parameters]>
 
