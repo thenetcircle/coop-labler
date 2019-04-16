@@ -1,17 +1,22 @@
 from labler.cli import opts
 from labler.cli import op
 from labler.cli import errors
+from labler.cli.errors import FatalException
+from labler.cli.opts import AppSession
 from labler.environ import env
 
 import sys
 import traceback
 
 
-def op_create(app, args):
+def op_create(app: AppSession, args):
     if len(args) == 0:
         raise errors.FatalException('no name specified when creating project')
 
     name = args[0]
+    if env.db.project_exists(name):
+        raise FatalException(f'project already exists with name {name}')
+
     if app.lambdaenv.pretend:
         app.printer.notice(f'would create new project called {name}')
     else:

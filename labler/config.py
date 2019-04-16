@@ -33,3 +33,14 @@ class ConfigKeys(object):
     DEFAULT_LOG_FORMAT = "%(asctime)s - %(name)-18s - %(levelname)-7s - %(message)s"
     DEFAULT_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
     DEFAULT_LOG_LEVEL = 'INFO'
+
+
+ProjectTypes = (
+    'classification',
+    'localization',
+    'detection',
+    'segmentation'
+)
+ProjectTypesShort = (
+    'c', 'l', 'd', 's'
+)

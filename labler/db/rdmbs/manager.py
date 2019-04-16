@@ -36,3 +36,8 @@ class DatabaseRdbms(IDatabase):
 
         session.add(project)
         session.commit()
+
+    @with_session
+    def project_exists(self, name, session=None):
+        project = session.query(Projects).filter_by(name=name).first()
+        return project is not None
