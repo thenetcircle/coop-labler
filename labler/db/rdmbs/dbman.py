@@ -1,3 +1,4 @@
+from gnenv.environ import GNEnvironment
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import scoped_session
@@ -11,7 +12,7 @@ from labler.db.rdmbs.models import *
 
 
 class Database(object):
-    def __init__(self, env):
+    def __init__(self, env: GNEnvironment):
         """
         Initializes database connection and sessionmaker.
         Creates deals table.
