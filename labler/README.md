@@ -1,3 +1,3 @@
-# Flask backend to serve claims on training data to label by users
+# Flask backend to serve claims on training data for users to label
 
 TODO
