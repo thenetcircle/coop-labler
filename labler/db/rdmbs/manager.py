@@ -62,12 +62,52 @@ class DatabaseRdbms(IDatabase):
         return project is not None
 
     @with_session
-    def get_claims(self, name, session=None):
+    def get_all_claims(self, session=None):
         return [{
+            'project': claim.project_name,
+            'file_name': claim.file_name,
+            'claimed_by': claim.claimed_by,
+            'claimed_at': claim.claimed_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
+        } for claim in session.query(Claims).all()]
+
+    @with_session
+    def get_claims_for_user(self, user, session=None):
+        return [{
+            'project': claim.project_name,
+            'file_name': claim.file_name,
+            'claimed_by': claim.claimed_by,
+            'claimed_at': claim.claimed_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
+        } for claim in session.query(Claims).filter_by(claimed_by=user).all()]
+
+    @with_session
+    def get_claims_for_project(self, name, session=None):
+        return [{
+            'project': claim.project_name,
             'file_name': claim.file_name,
             'claimed_by': claim.claimed_by,
             'claimed_at': claim.claimed_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
         } for claim in session.query(Claims).filter_by(project_name=name).all()]
+
+    @with_session
+    def get_claims_for_project_and_user(self, name, user, session=None):
+        return [{
+            'project': claim.project_name,
+            'file_name': claim.file_name,
+            'claimed_by': claim.claimed_by,
+            'claimed_at': claim.claimed_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
+        } for claim in session.query(Claims).filter_by(project_name=name).filter_by(claimed_by=user).all()]
+
+    def get_claims(self, name=None, user=None):
+        if name is None and user is None:
+            return self.get_all_claims()
+
+        if name is not None and user is not None:
+            return self.get_claims_for_project_and_user(name, user)
+
+        if name is not None:
+            return self.get_claims_for_project(name)
+
+        return self.get_claims_for_user(user)
 
     @with_session
     def get_projects(self, session=None):

@@ -4,9 +4,11 @@ from typing import List
 from typing import Union
 
 from flask import jsonify
+from git import GitCommandError
 from git.cmd import Git
 
 from labler.server import app
+from labler.environ import env
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -16,7 +18,11 @@ environment = os.environ.get('LB_ENVIRONMENT', default=None)
 
 if home_dir is None:
     home_dir = '.'
-tag_name = Git(home_dir).describe()
+
+try:
+    tag_name = Git(home_dir).describe()
+except GitCommandError:
+    tag_name = '<no version>'
 
 
 def is_blank(s: str):
@@ -41,4 +47,44 @@ def index():
     return api_response(
         code=200,
         data=dict()
+    )
+
+
+@app.route('/claims/user/<user>', methods=['GET'])
+def claims_for_user(user):
+    return api_response(
+        code=200,
+        data=env.db.get_claims(name=None, user=user)
+    )
+
+
+@app.route('/claims/project/<project>', methods=['GET'])
+def claims_for_project(project):
+    return api_response(
+        code=200,
+        data=env.db.get_claims(name=project, user=None)
+    )
+
+
+@app.route('/claims/project/<project>/user/<user>', methods=['GET'])
+def claims_for_project_and_user(project, user):
+    return api_response(
+        code=200,
+        data=env.db.get_claims(name=project, user=user)
+    )
+
+
+@app.route('/claims', methods=['GET'])
+def all_claims():
+    return api_response(
+        code=200,
+        data=env.db.get_claims(name=None, user=None)
+    )
+
+
+@app.route('/projects', methods=['GET'])
+def projects():
+    return api_response(
+        code=200,
+        data=env.db.get_projects()
     )

@@ -3,13 +3,14 @@ from labler.cli import op
 from labler.cli import errors
 from labler.cli.errors import FatalException
 from labler.cli.opts import AppSession
-from labler.environ import env
 
 import sys
 import traceback
 
 
 def op_create(app: AppSession, args):
+    from labler.environ import env
+
     if len(args) == 0:
         raise errors.FatalException('no project name specified')
 
@@ -25,6 +26,8 @@ def op_create(app: AppSession, args):
 
 
 def op_update(app: AppSession, args):
+    from labler.environ import env
+
     if len(args) == 0:
         raise errors.FatalException('no project name specified')
 
@@ -40,6 +43,8 @@ def op_update(app: AppSession, args):
 
 
 def op_projects(app: AppSession, _):
+    from labler.environ import env
+
     app.printer.action(f'listing projects')
     projects = env.db.get_projects()
 
@@ -59,6 +64,8 @@ def op_projects(app: AppSession, _):
 
 
 def op_claims(app: AppSession, args):
+    from labler.environ import env
+
     if len(args) == 0:
         raise errors.FatalException('no project name specified')
 
