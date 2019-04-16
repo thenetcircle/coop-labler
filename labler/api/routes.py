@@ -40,6 +40,5 @@ def api_response(code, data: Union[dict, List[dict]] = None, message: Union[dict
 def index():
     return api_response(
         code=200,
-        data=dict(),
-
+        data=dict()
     )

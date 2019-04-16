@@ -68,9 +68,7 @@ def create_app():
     secret = environ.env.config.get(ConfigKeys.SECRET_KEY, default=str(uuid()))
 
     _app = Flask(
-        import_name=__name__,
-        template_folder='admin/templates/',
-        static_folder='admin/static/'
+        import_name=__name__
     )
 
     _app.wsgi_app = ReverseProxied(ProxyFix(_app.wsgi_app))

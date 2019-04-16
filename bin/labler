@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import traceback
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(sys.argv[0])))
+
+try:
+    from labler.cli import entrypoint
+except ImportError as e:
+    print(f'Could not find entrypoint: {str(e)}')
+    print(traceback.format_exc())
+    sys.exit(1)
+
+entrypoint()
