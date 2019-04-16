@@ -35,12 +35,10 @@ class ConfigKeys(object):
     DEFAULT_LOG_LEVEL = 'INFO'
 
 
-ProjectTypes = (
-    'classification',
-    'localization',
-    'detection',
-    'segmentation'
-)
-ProjectTypesShort = (
-    'c', 'l', 'd', 's'
-)
+ProjectTypes = {
+    'c': 'classification',
+    'l': 'localization',
+    'd': 'detection',
+    's': 'segmentation'
+}
+ProjectTypesShort = list(ProjectTypes.keys())

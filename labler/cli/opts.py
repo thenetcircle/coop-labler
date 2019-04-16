@@ -3,7 +3,6 @@ import getopt
 import sys
 
 from labler.cli import errors
-from labler.config import ProjectTypesShort
 from labler.config import ProjectTypes
 
 version_str = 'Coop-Labler version {}'
@@ -23,7 +22,9 @@ LambdaTemplate = {
     'suppressed': set(),
     'pretend': False,
     'silent': False,
-    'verbose': True
+    'verbose': True,
+    'classes': 2,
+    'project_type': 'classification'
 }
 
 
@@ -90,14 +91,14 @@ class AppSession:
                 sys.exit(0)
 
             elif opt in ('-t', '--type'):
-                self.lambdaenv.project_type = arg
+                self.lambdaenv.project_type = arg if len(arg) > 1 else ProjectTypes.get(arg)
 
-                if arg not in ProjectTypes and arg not in ProjectTypesShort:
+                if arg not in ProjectTypes.keys() and arg not in ProjectTypes.values():
                     raise errors.FatalException(
                         'unknown project type "{arg}", must be in [{project_types}] or [{project_types_short}]'.format(
                             arg=arg,
-                            project_types=', '.join(ProjectTypes),
-                            project_types_short=', '.join(ProjectTypesShort))
+                            project_types=', '.join(ProjectTypes.values()),
+                            project_types_short=', '.join(ProjectTypes.keys()))
                     )
 
             else:
@@ -118,7 +119,7 @@ def usage():
             --pretend (or -p):
                 Just pretend to do actions, telling what you would do.
             --silent (or -s):
-                Supresses what is defined in 'suppressed'.
+                Suppresses what is defined in 'suppressed'.
             --verbose (or -v):
                 Makes labler more talkative.
             --classes (or -c):
@@ -132,5 +133,5 @@ def usage():
             help
                 Show the help text and exit.
     """.format(
-        project_types=', '.join([f'{long} ({short})' for long, short in zip(ProjectTypes, ProjectTypesShort)])
+        project_types=', '.join([f'{long} ({short})' for short, long in ProjectTypes.items()])
     )

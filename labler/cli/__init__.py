@@ -21,7 +21,7 @@ def op_create(app: AppSession, args):
         app.printer.notice(f'would create new project called {name}')
     else:
         app.printer.action(f'creating project: {name}')
-        env.db.create_project(name)
+        env.db.create_project(name, app)
 
 
 def main(app):

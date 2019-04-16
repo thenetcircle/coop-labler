@@ -2,6 +2,7 @@ from functools import wraps
 
 from gnenv.environ import GNEnvironment
 
+from labler.cli import AppSession
 from labler.db import IDatabase
 from labler.db.rdmbs.dbman import Database
 from labler.db.rdmbs.models import Projects
@@ -30,9 +31,11 @@ class DatabaseRdbms(IDatabase):
         DatabaseRdbms.db = Database(env)
 
     @with_session
-    def create_project(self, name, session=None):
+    def create_project(self, name, app: AppSession, session=None):
         project = Projects()
         project.name = name
+        project.classes = app.lambdaenv.classes
+        project.project_type = app.lambdaenv.project_type
 
         session.add(project)
         session.commit()
