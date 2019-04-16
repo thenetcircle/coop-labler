@@ -7,16 +7,11 @@ from sqlalchemy.orm import sessionmaker
 from labler.config import ConfigKeys
 
 # need to keep these here even if "unused", otherwise create_all(engine) won't find the models
-from labler.db.rdmbs import DeclarativeBase
 from labler.db.rdmbs.models import *
 
 
 class Database(object):
     def __init__(self, env: GNEnvironment):
-        """
-        Initializes database connection and sessionmaker.
-        Creates deals table.
-        """
         self.env = env
         self.driver = self.env.config.get(ConfigKeys.DRIVER, domain=ConfigKeys.DATABASE, default='postgres+psycopg2')
         self.engine = self.db_connect()
@@ -25,10 +20,6 @@ class Database(object):
         self.Session = scoped_session(session_factory)
 
     def db_connect(self):
-        """
-        Performs database connection using database settings from settings.py.
-        Returns sqlalchemy engine instance
-        """
         domain = ConfigKeys.DATABASE
         params = {
             'drivername': self.driver,
