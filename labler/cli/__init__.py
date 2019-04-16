@@ -1,6 +1,7 @@
 from labler.cli import opts
 from labler.cli import op
 from labler.cli import errors
+from labler.environ import env
 
 import sys
 import traceback
@@ -15,7 +16,7 @@ def op_create(app, args):
         app.printer.notice(f'would create new project called {name}')
     else:
         app.printer.action(f'creating project: {name}')
-        # db.create(name)
+        env.db.create_project(name)
 
 
 def main(app):

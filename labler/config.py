@@ -18,12 +18,13 @@ class ConfigKeys(object):
     DSN = 'dsn'
     TYPE = 'type'
     PORT = 'port'
-    PASS = 'password'
+    PASSWORD = 'password'
     USER = 'username'
     NAME = 'name'
     HOSTS = 'hosts'
     POOL_SIZE = 'pool_size'
     DATABASE = 'database'
+    DB = 'db'
 
     # will be overwritten even if specified in config file
     ENVIRONMENT = '_environment'

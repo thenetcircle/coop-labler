@@ -1,0 +1,9 @@
+database:
+  type: 'rdbms'
+  driver: $DB_DRIVER'
+  host: '$DB_HOST'
+  port: $DB_PORT
+  db: '$DB_NAME'
+  user: '$DB_USER'
+  password: '$DB_PASS'
+  pool_size: 10
