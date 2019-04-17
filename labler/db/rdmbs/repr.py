@@ -3,6 +3,43 @@ import datetime
 from labler.config import ConfigKeys
 
 
+class ExampleFields(object):
+    ID = 'id'
+    FILE_PATH = 'file_path'
+    FILE_NAME = 'file_name'
+    PROJECT_NAME = 'project_name'
+    WIDTH = 'width'
+    HEIGHT = 'height'
+
+
+class ExampleRepr(object):
+    def __init__(
+            self,
+            _id: int = None,
+            file_path: str = None,
+            file_name: str = None,
+            project_name: str = None,
+            width: int = None,
+            height: int = None,
+    ):
+        self.id = _id
+        self.file_path = file_path
+        self.file_name = file_name
+        self.project_name = project_name
+        self.width = width
+        self.height = height
+
+    def to_dict(self):
+        return {
+            ExampleFields.ID: self.id or '',
+            ExampleFields.FILE_PATH: self.file_path or '',
+            ExampleFields.FILE_NAME: self.file_name or '',
+            ExampleFields.PROJECT_NAME: self.project_name or '',
+            ExampleFields.WIDTH: self.width or '',
+            ExampleFields.HEIGHT: self.height or '',
+        }
+
+
 class ProjectFields(object):
     ID = 'id'
     PROJECT_NAME = 'project_name'

@@ -46,5 +46,13 @@ class ProjectTypes(Enum):
         return project_type.value[0]
 
     @staticmethod
+    def shorts():
+        return [pt.value[0] for pt in ProjectTypes]
+
+    @staticmethod
+    def longs():
+        return [pt.value for pt in ProjectTypes]
+
+    @staticmethod
     def to_dict():
         return {pt.value[0]: pt.value for pt in ProjectTypes}

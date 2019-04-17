@@ -8,6 +8,7 @@ from flask import request
 from git import GitCommandError
 from git.cmd import Git
 
+from labler import errors
 from labler.config import ProjectTypes
 from labler.server import app
 from labler.environ import env
@@ -125,6 +126,10 @@ def submit_label_for_claim(claim_id):
         else:
             return api_response(400, message=f'unknown project type {project_type}')
 
+    except errors.LablerException as e:
+        logger.error(f'submit_label_for_claim() failed: {str(e)}')
+        return api_response(400, message=str(e))
+
     except Exception as e:
         logger.error(f'submit_label_for_claim() failed: {str(e)}')
         logger.exception(e)
@@ -134,8 +139,8 @@ def submit_label_for_claim(claim_id):
 
 
 @app.route('/projects', methods=['GET'])
-def projects():
-    return api_response(
-        code=200,
-        data=env.db.get_projects()
-    )
+def list_projects():
+    projects = env.db.get_projects()
+    projects_json = [project.to_dict() for project in projects]
+
+    return api_response(code=200, data=projects_json)

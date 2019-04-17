@@ -1,8 +1,8 @@
 from abc import ABC
 from typing import List
 
-from labler.cli import AppSession
-from labler.db.rdmbs.repr import LabelRepr, ClaimRepr
+from labler.cli.opts import AppSession
+from labler.db.rdmbs.repr import LabelRepr, ClaimRepr, ProjectRepr
 
 
 class IDatabase(ABC):
@@ -18,7 +18,7 @@ class IDatabase(ABC):
     def get_claims(self, name=None, user=None) -> List[ClaimRepr]:
         raise NotImplementedError()
 
-    def get_projects(self) -> List[dict]:
+    def get_projects(self) -> List[ProjectRepr]:
         raise NotImplementedError()
 
     def get_project_names(self) -> List[str]:

@@ -6,7 +6,7 @@ from sqlalchemy.sql import expression
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import DateTime
 
-from labler.db.rdmbs.repr import ClaimRepr
+from labler.db.rdmbs.repr import ClaimRepr, ExampleRepr, ProjectRepr
 
 
 class utcnow(expression.FunctionElement):
@@ -23,6 +23,29 @@ def ms_utcnow(element, compiler, **kw):
     return "GETUTCDATE()"
 
 
+class Examples(DeclarativeBase):
+    __tablename__ = 'examples'
+
+    id = Column(Integer, primary_key=True)
+
+    file_path = Column('file_path', String(256), nullable=False, index=True, unique=False)
+    file_name = Column('file_name', String(256), nullable=False, index=True, unique=False)
+    project_name = Column('project_name', String(256), nullable=False, index=True, unique=False)
+
+    width = Column('width', Integer, nullable=False)
+    height = Column('height', Integer, nullable=False)
+
+    def to_repr(self) -> ExampleRepr:
+        return ExampleRepr(
+            _id=self.id,
+            file_path=self.file_path,
+            file_name=self.file_name,
+            project_name=self.project_name,
+            width=self.width,
+            height=self.height
+        )
+
+
 class Projects(DeclarativeBase):
     __tablename__ = 'projects'
 
@@ -34,6 +57,17 @@ class Projects(DeclarativeBase):
     project_type = Column('project_type', String(32), nullable=False, server_default='classification')
     classes = Column('classes', Integer, nullable=False, server_default=text('2'))
     finished = Column('finished', Boolean, nullable=False, server_default=text('false'))
+
+    def to_repr(self) -> ProjectRepr:
+        return ProjectRepr(
+            _id=self.id,
+            project_name=self.project_name,
+            directory=self.directory,
+            created=self.created,
+            project_type=self.project_type,
+            classes=self.classes,
+            finished=self.finished
+        )
 
 
 class Claims(DeclarativeBase):
@@ -97,4 +131,4 @@ class Labels(DeclarativeBase):
             xmax=self.xmax,
             ymin=self.ymin,
             ymax=self.ymax
-    )
+        )

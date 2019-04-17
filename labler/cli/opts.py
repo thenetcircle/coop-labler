@@ -98,7 +98,7 @@ class AppSession:
             elif opt in ('-t', '--type'):
                 self.lambdaenv.project_type = arg if len(arg) > 1 else ProjectTypes.get(arg)
 
-                if arg not in ProjectTypes.keys() and arg not in ProjectTypes.values():
+                if arg not in ProjectTypes.shorts() and arg not in ProjectTypes.longs():
                     raise errors.FatalException(
                         'unknown project type "{arg}", must be in [{project_types}] or [{project_types_short}]'.format(
                             arg=arg,
@@ -148,5 +148,5 @@ def usage():
             help
                 Show the help text and exit.
     """.format(
-        project_types=', '.join([f'{long} ({short})' for short, long in ProjectTypes.items()])
+        project_types=', '.join([f'{long} ({short})' for short, long in ProjectTypes.to_dict().items()])
     )

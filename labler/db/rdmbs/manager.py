@@ -6,9 +6,9 @@ from gnenv.environ import GNEnvironment
 
 from labler.cli import AppSession
 from labler import errors
-from labler.db import IDatabase, ClaimRepr
+from labler.db import IDatabase, ClaimRepr, ProjectRepr
 from labler.db.rdmbs.dbman import Database
-from labler.db.rdmbs.models import Projects, Claims, Labels
+from labler.db.rdmbs.models import Projects, Claims, Labels, Examples
 from labler.db.rdmbs.repr import LabelRepr, ClaimStatuses, LabelStatuses
 
 
@@ -108,13 +108,8 @@ class DatabaseRdbms(IDatabase):
         return self._get_claims_for_user(user)
 
     @with_session
-    def get_projects(self, session=None) -> List[dict]:
-        return [{
-            'project_name': project.project_name,
-            'project_type': project.project_type,
-            'classes': project.classes,
-            'directory': project.directory
-        } for project in session.query(Projects).all()]
+    def get_projects(self, session=None) -> List[ProjectRepr]:
+        return [project.to_repr() for project in session.query(Projects).all()]
 
     @with_session
     def get_project_names(self, session=None) -> List[str]:
@@ -122,19 +117,18 @@ class DatabaseRdbms(IDatabase):
 
     @with_session
     def get_unclaimed(self, project, limit=10, session=None) -> List[LabelRepr]:
-        labels = session.query(Labels)\
+        examples = session.query(Examples)\
             .filter_by(project_name=project)\
-            .filter_by(status=LabelStatuses.WAITING)\
             .outerjoin(Claims, and_(
-                Labels.project_name == Claims.project_name,
-                Labels.file_path == Claims.file_path,
-                Labels.file_name == Claims.file_name
+                Examples.project_name == Claims.project_name,
+                Examples.file_path == Claims.file_path,
+                Examples.file_name == Claims.file_name
             ))\
             .filter(Claims.id.is_(None))\
             .limit(limit)\
             .all()
 
-        return [label.to_repr() for label in labels]
+        return [example.to_repr() for example in examples]
 
     @with_session
     def claim_for(self, to_claim: List[LabelRepr], user: str, session=None) -> None:

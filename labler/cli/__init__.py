@@ -5,6 +5,7 @@ import labler
 from labler import errors
 from labler.cli import op
 from labler.cli import opts
+from labler.db.rdmbs.repr import ClaimFields
 from labler.errors import FatalException
 from labler.cli.opts import AppSession
 
@@ -50,15 +51,15 @@ def op_projects(app: AppSession, _):
     projects = env.db.get_projects()
 
     app.printer.blanknotice('')
-    header = 'project name\tproject type\tclasses\tdirectory'.expandtabs(tabsize=20)
+    header = 'project name \tproject type \tclasses \tdirectory'.expandtabs(tabsize=20)
     app.printer.blanknotice(header)
     app.printer.blanknotice('-' * len(header))
 
     for project in projects:
-        pname = project['project_name']
-        ptype = project['project_type']
-        pcls = project['classes']
-        pdir = project['directory']
+        pname = project.project_name
+        ptype = project.project_type
+        pcls = project.classes
+        pdir = project.directory
 
         app.printer.blanknotice(
             f'{pname} \t{ptype} \t{pcls} \t{pdir}'.expandtabs(tabsize=20))
@@ -78,13 +79,16 @@ def op_claims(app: AppSession, args):
     claims = env.db.get_claims(name)
 
     app.printer.blanknotice('')
-    header = 'file name\tclaimed by\tclaimed at'.expandtabs(tabsize=20)
+    header = 'file name \tstatus \tclaimed by \tclaimed at'.expandtabs(tabsize=20)
+
     app.printer.blanknotice(header)
     app.printer.blanknotice('-' * len(header))
 
     for claim in claims:
+        claim_json = claim.to_dict()
+        claimed_at = claim_json[ClaimFields.CLAIMED_AT]
         app.printer.blanknotice(
-            f'{claim["file_name"]}\t{claim["claimed_by"]}\t{claim["claimed_at"]}'.expandtabs(tabsize=20))
+            f'{claim.file_name} \t{claim.status} \t{claim.claimed_by} \t{claimed_at}'.expandtabs(tabsize=20))
 
 
 def main(app):
