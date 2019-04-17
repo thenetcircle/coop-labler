@@ -1,3 +1,16 @@
+
+<style>
+#canvas {
+    width:2000px;
+    height:2000px;
+    border: 10px solid transparent;
+}
+.rectangle {
+    border: 1px solid #FF0000;
+    position: absolute;
+}
+</style>
+
 <template>
   <v-app id="inspire">
     <v-toolbar color="indigo" dark fixed app>
