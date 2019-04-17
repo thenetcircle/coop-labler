@@ -27,7 +27,7 @@ LambdaTemplate = {
 
 class AppSession:
     def read_argv(self, argv):
-        from labler.cli import errors
+        from labler import errors
 
         try:
             opts, argv = getopt.gnu_getopt(
@@ -51,7 +51,7 @@ class AppSession:
 
     def __init__(self, argv):
         from labler.config import ProjectTypes
-        from labler.cli import errors
+        from labler import errors
         from labler.cli import printer
 
         self.configured = False

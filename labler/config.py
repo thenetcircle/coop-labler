@@ -35,10 +35,16 @@ class ConfigKeys(object):
     DEFAULT_LOG_LEVEL = 'INFO'
 
 
-ProjectTypes = {
-    'c': 'classification',
-    'l': 'localization',
-    'd': 'detection',
-    's': 'segmentation'
-}
-ProjectTypesShort = list(ProjectTypes.keys())
+class ProjectTypes(Enum):
+    CLASSIFICATION = 'classification'
+    LOCALIZATION = 'localization'
+    DETECTION = 'detection'
+    SEGMENTATION = 'segmentation'
+
+    @staticmethod
+    def short(project_type):
+        return project_type.value[0]
+
+    @staticmethod
+    def to_dict():
+        return {pt.value[0]: pt.value for pt in ProjectTypes}

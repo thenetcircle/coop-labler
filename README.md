@@ -2,6 +2,8 @@
 
 Cooperative labeling of training data.
 
+![Project Types](docs/project-types.png)
+
 ## CLI tool to create/manage projects
 
 For more details, see [README](labler/cli/README.md) in cli project.

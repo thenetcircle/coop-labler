@@ -1,7 +1,7 @@
 import traceback
 import sys
 
-from labler.cli import errors
+from labler import errors
 from labler.cli.opts import AppSession
 
 

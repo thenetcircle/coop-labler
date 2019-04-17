@@ -39,12 +39,6 @@ class Projects(DeclarativeBase):
 class Claims(DeclarativeBase):
     __tablename__ = 'claims'
 
-    class Statuses(object):
-        WAITING = 'waiting'
-        CANCELLED = 'cancelled'
-        FINISHED = 'finished'
-        INVALID = 'invalid'
-
     id = Column(Integer, primary_key=True)
 
     file_path = Column('file_path', String(256), nullable=False, index=True, unique=False)
@@ -70,11 +64,6 @@ class Claims(DeclarativeBase):
 
 class Labels(DeclarativeBase):
     __tablename__ = 'labels'
-
-    class Statuses(object):
-        WAITING = 'waiting'
-        FINISHED = 'finished'
-        REMOVED = 'removed'
 
     id = Column(Integer, primary_key=True)
 

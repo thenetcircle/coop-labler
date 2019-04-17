@@ -4,9 +4,11 @@ from typing import List
 from typing import Union
 
 from flask import jsonify
+from flask import request
 from git import GitCommandError
 from git.cmd import Git
 
+from labler.config import ProjectTypes
 from labler.server import app
 from labler.environ import env
 
@@ -43,10 +45,7 @@ def api_response(code, data: Union[dict, List[dict]] = None, message: Union[dict
 
 @app.route('/', methods=['GET'])
 def index():
-    return api_response(
-        code=200,
-        data=dict()
-    )
+    return api_response(code=200)
 
 
 @app.route('/claims/user/<user>', methods=['GET'])
@@ -54,10 +53,7 @@ def claims_for_user(user):
     claims = env.db.get_claims(name=None, user=user)
     claims_json = [claim.to_dict() for claim in claims]
 
-    return api_response(
-        code=200,
-        data=claims_json
-    )
+    return api_response(code=200, data=claims_json)
 
 
 @app.route('/claims/project/<project>', methods=['GET'])
@@ -65,10 +61,7 @@ def claims_for_project(project):
     claims = env.db.get_claims(name=project, user=None)
     claims_json = [claim.to_dict() for claim in claims]
 
-    return api_response(
-        code=200,
-        data=claims_json
-    )
+    return api_response(code=200, data=claims_json)
 
 
 @app.route('/claims/project/<project>/user/<user>', methods=['GET'])
@@ -76,10 +69,7 @@ def claims_for_project_and_user(project, user):
     claims = env.db.get_claims(name=project, user=user)
     claims_json = [claim.to_dict() for claim in claims]
 
-    return api_response(
-        code=200,
-        data=claims_json
-    )
+    return api_response(code=200, data=claims_json)
 
 
 @app.route('/claims', methods=['GET'])
@@ -87,10 +77,7 @@ def all_claims():
     claims = env.db.get_claims(name=None, user=None)
     claims_json = [claim.to_dict() for claim in claims]
 
-    return api_response(
-        code=200,
-        data=claims_json
-    )
+    return api_response(code=200, data=claims_json)
 
 
 @app.route('/claim/project/<project>/user/<user>', methods=['GET'])
@@ -98,10 +85,52 @@ def claim_new_labels(project, user):
     claims = env.claimer.claim(project=project, user=user)
     claims_json = [claim.to_dict() for claim in claims]
 
-    return api_response(
-        code=200,
-        data=claims_json
-    )
+    return api_response(code=200, data=claims_json)
+
+
+@app.route('/submit/<claim_id>', methods=['PUT'])
+def submit_label_for_claim(claim_id):
+    if claim_id is None or len(claim_id) == 0:
+        return api_response(400, message='blank claim id in submission')
+
+    try:
+        int(claim_id)
+    except ValueError:
+        return api_response(400, message='invalid claim id')
+
+    try:
+        content = request.json
+    except Exception as e:
+        logger.error(f'submit_label_for_claim() failed: {str(e)}')
+        logger.exception(e)
+        return api_response(400, message=f'bad request: {str(e)}')
+
+    try:
+        project_type = content.get('project_type', None)
+        if project_type is None:
+            return api_response(400, message='no project_type in data')
+
+        if project_type == ProjectTypes.CLASSIFICATION.value:
+            env.claimer.submit_classification(claim_id, content)
+
+        elif project_type == ProjectTypes.DETECTION.value:
+            env.claimer.submit_detection(claim_id, content)
+
+        elif project_type == ProjectTypes.LOCALIZATION.value:
+            env.claimer.submit_localization(claim_id, content)
+
+        elif project_type == ProjectTypes.SEGMENTATION.value:
+            env.claimer.submit_segmentation(claim_id, content)
+
+        else:
+            return api_response(400, message=f'unknown project type {project_type}')
+
+    except Exception as e:
+        logger.error(f'submit_label_for_claim() failed: {str(e)}')
+        logger.exception(e)
+        return api_response(400, message=f'bad request: {str(e)}')
+
+    return api_response(200)
 
 
 @app.route('/projects', methods=['GET'])

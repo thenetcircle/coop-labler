@@ -3,6 +3,52 @@ import datetime
 from labler.config import ConfigKeys
 
 
+class ProjectFields(object):
+    ID = 'id'
+    PROJECT_NAME = 'project_name'
+    DIRECTORY = 'directory'
+    CREATED = 'created'
+    PROJECT_TYPE = 'project_type'
+    CLASSES = 'classes'
+    FINISHED = 'finished'
+
+
+class ProjectRepr(object):
+    def __init__(
+            self,
+            _id: int = None,
+            project_name: str = None,
+            directory: str = None,
+            created: datetime = None,
+            project_type: str = None,
+            classes: int = None,
+            finished: bool = None
+    ):
+        self.id = _id
+
+        self.project_name = project_name
+        self.directory = directory
+        self.created = created
+        self.project_type = project_type
+        self.classes = classes
+        self.finished = finished
+
+    def to_dict(self):
+        created = None
+        if self.created is not None:
+            created = self.created.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
+
+        return {
+            ProjectFields.ID: self.id or '',
+            ProjectFields.PROJECT_NAME: self.project_name or '',
+            ProjectFields.DIRECTORY: self.directory or '',
+            ProjectFields.CREATED: created or '',
+            ProjectFields.PROJECT_TYPE: self.project_type or '',
+            ProjectFields.CLASSES: self.classes or '',
+            ProjectFields.FINISHED: self.finished or '',
+        }
+
+
 class ClaimFields(object):
     ID = 'id'
     FILE_PATH = 'file_path'
@@ -11,6 +57,13 @@ class ClaimFields(object):
     CLAIMED_AT = 'claimed_at'
     CLAIMED_BY = 'claimed_by'
     STATUS = 'status'
+
+
+class ClaimStatuses(object):
+    WAITING = 'waiting'
+    CANCELLED = 'cancelled'
+    FINISHED = 'finished'
+    INVALID = 'invalid'
 
 
 class ClaimRepr(object):
@@ -64,6 +117,12 @@ class LabelFields(object):
     XMAX = 'xmax'
     YMIN = 'ymin'
     YMAX = 'ymax'
+
+
+class LabelStatuses(object):
+    WAITING = 'waiting'
+    FINISHED = 'finished'
+    REMOVED = 'removed'
 
 
 class LabelRepr(object):

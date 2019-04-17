@@ -27,5 +27,14 @@ class IDatabase(ABC):
     def get_unclaimed(self, project, limit=10, session=None) -> List[LabelRepr]:
         raise NotImplementedError()
 
+    def get_claim(self, claim_id: int) -> ClaimRepr:
+        raise NotImplementedError()
+
+    def finish_claim(self, claim_id: int) -> None:
+        raise NotImplementedError()
+
+    def create_label_localization_or_detection(self, label: LabelRepr) -> None:
+        raise NotImplementedError()
+
     def claim_for(self, to_claim: List[LabelRepr], user: str, session=None) -> None:
         raise NotImplementedError()

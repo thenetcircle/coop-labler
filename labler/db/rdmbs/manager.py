@@ -1,14 +1,15 @@
 from functools import wraps
-from typing import List
+from typing import List, Union
 from sqlalchemy import and_
 
 from gnenv.environ import GNEnvironment
 
-from labler.cli import AppSession, errors
+from labler.cli import AppSession
+from labler import errors
 from labler.db import IDatabase, ClaimRepr
 from labler.db.rdmbs.dbman import Database
 from labler.db.rdmbs.models import Projects, Claims, Labels
-from labler.db.rdmbs.repr import LabelRepr
+from labler.db.rdmbs.repr import LabelRepr, ClaimStatuses, LabelStatuses
 
 
 def with_session(view_func):
@@ -123,7 +124,7 @@ class DatabaseRdbms(IDatabase):
     def get_unclaimed(self, project, limit=10, session=None) -> List[LabelRepr]:
         labels = session.query(Labels)\
             .filter_by(project_name=project)\
-            .filter_by(status=Labels.Statuses.WAITING)\
+            .filter_by(status=LabelStatuses.WAITING)\
             .outerjoin(Claims, and_(
                 Labels.project_name == Claims.project_name,
                 Labels.file_path == Claims.file_path,
@@ -139,11 +140,47 @@ class DatabaseRdbms(IDatabase):
     def claim_for(self, to_claim: List[LabelRepr], user: str, session=None) -> None:
         for label in to_claim:
             claim = Claims()
-            claim.status = Claims.Statuses.WAITING
+            claim.status = ClaimStatuses.WAITING
             claim.claimed_by = user
             claim.project_name = label.project_name
             claim.file_path = label.file_path
             claim.file_name = label.file_name
             session.add(claim)
 
+        session.commit()
+
+    @with_session
+    def get_claim(self, claim_id: int, session=None) -> Union[ClaimRepr, None]:
+        claim = session.query(Claims).filter_by(id=claim_id).first()
+        if claim is None:
+            return None
+
+        return claim.to_repr()
+
+    @with_session
+    def finish_claim(self, claim_id: int, session=None) -> None:
+        claim = session.query(Claims).filter_by(id=claim_id).first()
+        if claim is None:
+            return
+
+        claim.status = ClaimStatuses.FINISHED
+        session.add(claim)
+        session.commit()
+
+    @with_session
+    def create_label_localization_or_detection(self, label_repr: LabelRepr, session=None) -> None:
+        label = Labels()
+
+        label.target_class = label_repr.target_class
+        label.xmin = label_repr.xmin
+        label.xmax = label_repr.xmax
+        label.ymin = label_repr.ymin
+        label.ymax = label_repr.ymax
+        label.file_name = label_repr.file_name
+        label.file_path = label_repr.file_path
+        label.status = label_repr.status
+        label.project_name = label_repr.project_name
+        label.submitted_by = label_repr.submitted_by
+
+        session.add(label)
         session.commit()

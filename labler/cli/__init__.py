@@ -2,10 +2,10 @@ import sys
 import traceback
 
 import labler
-from labler.cli import errors
+from labler import errors
 from labler.cli import op
 from labler.cli import opts
-from labler.cli.errors import FatalException
+from labler.errors import FatalException
 from labler.cli.opts import AppSession
 
 
