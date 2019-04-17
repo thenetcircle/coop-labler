@@ -18,3 +18,8 @@ class IClaimer(object):
 
     def submit_segmentation(self, claim_id, content) -> None:
         raise NotImplementedError()
+
+
+class IImager(object):
+    def load_b64(self, file_path, file_name) -> str:
+        pass

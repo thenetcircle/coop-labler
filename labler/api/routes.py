@@ -144,3 +144,17 @@ def list_projects():
     projects_json = [project.to_dict() for project in projects]
 
     return api_response(code=200, data=projects_json)
+
+
+@app.route('/api/image/<claim_id>', methods=['GET'])
+def get_image_b64(claim_id):
+    claim = env.db.get_claim(claim_id)
+    if claim is None:
+        return api_response(code=400, message='no such claim')
+
+    try:
+        b64image = env.imager.load_b64(claim.file_path, claim.file_name)
+    except Exception:
+        return api_response(code=500, message='could not load image for claim')
+
+    return api_response(code=200, data={'base64': b64image})

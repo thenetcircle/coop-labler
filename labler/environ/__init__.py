@@ -1,7 +1,7 @@
 import gnenv
 from gnenv.environ import GNEnvironment
 
-from labler.api import IClaimer
+from labler.api import IClaimer, IImager
 from labler.db import IDatabase
 from labler.db.rdmbs.manager import DatabaseRdbms
 
@@ -9,6 +9,7 @@ from labler.db.rdmbs.manager import DatabaseRdbms
 class LablerEnvironment(GNEnvironment):
     db: IDatabase = None
     claimer: IClaimer = None
+    imager: IImager = None
 
     def __init__(self, gn_env: GNEnvironment):
         super(LablerEnvironment, self).__init__(root_path=None, config=gn_env.config)
