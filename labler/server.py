@@ -31,7 +31,7 @@ class ReverseProxied(object):
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Scheme $scheme;
         proxy_set_header X-Script-Name /myprefix;
-        }
+    }
 
     :param app: the WSGI application
     """
@@ -53,44 +53,19 @@ class ReverseProxied(object):
 
 
 def create_app():
-    """
-    db_host = environ.env.config.get(ConfigKeys.HOST, domain=ConfigKeys.DATABASE)
-    db_port = int(environ.env.config.get(ConfigKeys.PORT, domain=ConfigKeys.DATABASE))
-    db_drvr = environ.env.config.get(ConfigKeys.DRIVER, domain=ConfigKeys.DATABASE)
-    db_user = environ.env.config.get(ConfigKeys.USER, domain=ConfigKeys.DATABASE)
-    db_pass = environ.env.config.get(ConfigKeys.PASS, domain=ConfigKeys.DATABASE)
-    db_name = environ.env.config.get(ConfigKeys.NAME, domain=ConfigKeys.DATABASE)
-    db_pool = int(environ.env.config.get(ConfigKeys.POOL_SIZE, domain=ConfigKeys.DATABASE))
-    """
+    from labler.environ import create_env
+    import labler
 
-    from labler.environ import env
+    environment = os.environ.get('LB_ENVIRONMENT', default=None)
+    env = create_env(environment, quiet=False)
+    labler.environ.env = env
+
     secret = env.config.get(ConfigKeys.SECRET_KEY, default=str(uuid()))
 
-    _app = Flask(
-        import_name=__name__
-    )
-
+    _app = Flask(import_name=__name__)
     _app.wsgi_app = ReverseProxied(ProxyFix(_app.wsgi_app))
-
     _app.config['SECRET_KEY'] = secret
-
-    """
-    _app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    _app.config['SQLALCHEMY_POOL_SIZE'] = db_pool
-    _app.config['SQLALCHEMY_DATABASE_URI'] = '{}://{}:{}@{}:{}/{}'.format(
-        db_drvr, db_user, db_pass, db_host, db_port, db_name
-    )
-
-    logger.info('configuring db: {}'.format(_app.config['SQLALCHEMY_DATABASE_URI']))
-    """
-
     env.app = _app
-
-    """
-    with _app.app_context():
-        environ.env.dbman.init_app(_app)
-        environ.env.dbman.create_all()
-    """
 
     return _app, Api(_app)
 

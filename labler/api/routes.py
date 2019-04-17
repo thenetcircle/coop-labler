@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 home_dir = os.environ.get('LB_HOME', default=None)
-environment = os.environ.get('LB_ENVIRONMENT', default=None)
 
 if home_dir is None:
     home_dir = '.'
@@ -79,6 +78,14 @@ def all_claims():
     return api_response(
         code=200,
         data=env.db.get_claims(name=None, user=None)
+    )
+
+
+@app.route('/claim/project/<project>/user/<user>', methods=['GET'])
+def all_claims(project, user):
+    return api_response(
+        code=200,
+        data=env.claimer.claim(project=project, user=user)
     )
 
 

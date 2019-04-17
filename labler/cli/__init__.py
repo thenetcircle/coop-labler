@@ -1,11 +1,12 @@
-from labler.cli import opts
-from labler.cli import op
-from labler.cli import errors
-from labler.cli.errors import FatalException
-from labler.cli.opts import AppSession
-
 import sys
 import traceback
+
+import labler
+from labler.cli import errors
+from labler.cli import op
+from labler.cli import opts
+from labler.cli.errors import FatalException
+from labler.cli.opts import AppSession
 
 
 def op_create(app: AppSession, args):
@@ -87,6 +88,9 @@ def op_claims(app: AppSession, args):
 
 
 def main(app):
+    from labler.environ import create_env
+    labler.environ.env = create_env('local', quiet=True)
+
     if len(app.args) < 1:
         print(opts.usage())
         return 0

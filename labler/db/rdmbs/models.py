@@ -1,9 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, text, func
+from sqlalchemy import Column, Integer, String, Boolean, text
 
+from labler.db import LabelRepr
 from labler.db.rdmbs import DeclarativeBase
 from sqlalchemy.sql import expression
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import DateTime
+
+from labler.db.rdmbs.repr import ClaimRepr
 
 
 class utcnow(expression.FunctionElement):
@@ -36,6 +39,12 @@ class Projects(DeclarativeBase):
 class Claims(DeclarativeBase):
     __tablename__ = 'claims'
 
+    class Statuses(object):
+        WAITING = 'waiting'
+        CANCELLED = 'cancelled'
+        FINISHED = 'finished'
+        INVALID = 'invalid'
+
     id = Column(Integer, primary_key=True)
 
     file_path = Column('file_path', String(256), nullable=False, index=True, unique=False)
@@ -45,9 +54,27 @@ class Claims(DeclarativeBase):
     claimed_at = Column('claimed_at', DateTime, nullable=False, server_default=utcnow())
     claimed_by = Column('claimed_by', String(128), nullable=False, index=True, unique=False)
 
+    status = Column('status', String(32), nullable=False, index=True, unique=False, server_default='waiting')
+
+    def to_repr(self):
+        return ClaimRepr(
+            _id=self.id,
+            file_path=self.file_path,
+            file_name=self.file_name,
+            project_name=self.project_name,
+            claimed_at=self.claimed_at,
+            claimed_by=self.claimed_by,
+            status=self.status
+        )
+
 
 class Labels(DeclarativeBase):
     __tablename__ = 'labels'
+
+    class Statuses(object):
+        WAITING = 'waiting'
+        FINISHED = 'finished'
+        REMOVED = 'removed'
 
     id = Column(Integer, primary_key=True)
 
@@ -59,8 +86,26 @@ class Labels(DeclarativeBase):
     submitted_by = Column('submitted_by', String(128), nullable=True, index=False, unique=False)
     submitted_at = Column('submitted_at', DateTime, nullable=False, server_default=utcnow())
 
+    status = Column('status', String(32), nullable=False, index=True, unique=False, server_default='waiting')
+
     xmin = Column('target_xmin', Integer, nullable=True, index=False, unique=False)
     xmax = Column('target_xmax', Integer, nullable=True, index=False, unique=False)
 
     ymin = Column('target_ymin', Integer, nullable=True, index=False, unique=False)
     ymax = Column('target_ymax', Integer, nullable=True, index=False, unique=False)
+
+    def to_repr(self):
+        return LabelRepr(
+            _id=self.id,
+            file_path=self.file_path,
+            file_name=self.file_name,
+            project_name=self.project_name,
+            target_class=self.target_class,
+            submitted_by=self.submitted_by,
+            submitted_at=self.submitted_at,
+            status=self.status,
+            xmin=self.xmin,
+            xmax=self.xmax,
+            ymin=self.ymin,
+            ymax=self.ymax
+    )

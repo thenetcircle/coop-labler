@@ -1,9 +1,5 @@
 import getopt
-
 import sys
-
-from labler.cli import errors
-from labler.config import ProjectTypes
 
 version_str = 'Coop-Labler version {}'
 
@@ -31,6 +27,8 @@ LambdaTemplate = {
 
 class AppSession:
     def read_argv(self, argv):
+        from labler.cli import errors
+
         try:
             opts, argv = getopt.gnu_getopt(
                 argv,
@@ -52,6 +50,8 @@ class AppSession:
             raise errors.FatalException(f'unknown option {e.opt}')
 
     def __init__(self, argv):
+        from labler.config import ProjectTypes
+        from labler.cli import errors
         from labler.cli import printer
 
         self.configured = False
@@ -114,6 +114,8 @@ class AppSession:
 
 
 def usage():
+    from labler.config import ProjectTypes
+
     return """
     labler - Cooperative labeling of images
     Usage: labler [option(s)] <operation [parameters]>
