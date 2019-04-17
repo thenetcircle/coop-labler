@@ -51,41 +51,56 @@ def index():
 
 @app.route('/claims/user/<user>', methods=['GET'])
 def claims_for_user(user):
+    claims = env.db.get_claims(name=None, user=user)
+    claims_json = [claim.to_dict() for claim in claims]
+
     return api_response(
         code=200,
-        data=env.db.get_claims(name=None, user=user)
+        data=claims_json
     )
 
 
 @app.route('/claims/project/<project>', methods=['GET'])
 def claims_for_project(project):
+    claims = env.db.get_claims(name=project, user=None)
+    claims_json = [claim.to_dict() for claim in claims]
+
     return api_response(
         code=200,
-        data=env.db.get_claims(name=project, user=None)
+        data=claims_json
     )
 
 
 @app.route('/claims/project/<project>/user/<user>', methods=['GET'])
 def claims_for_project_and_user(project, user):
+    claims = env.db.get_claims(name=project, user=user)
+    claims_json = [claim.to_dict() for claim in claims]
+
     return api_response(
         code=200,
-        data=env.db.get_claims(name=project, user=user)
+        data=claims_json
     )
 
 
 @app.route('/claims', methods=['GET'])
 def all_claims():
+    claims = env.db.get_claims(name=None, user=None)
+    claims_json = [claim.to_dict() for claim in claims]
+
     return api_response(
         code=200,
-        data=env.db.get_claims(name=None, user=None)
+        data=claims_json
     )
 
 
 @app.route('/claim/project/<project>/user/<user>', methods=['GET'])
-def all_claims(project, user):
+def claim_new_labels(project, user):
+    claims = env.claimer.claim(project=project, user=user)
+    claims_json = [claim.to_dict() for claim in claims]
+
     return api_response(
         code=200,
-        data=env.claimer.claim(project=project, user=user)
+        data=claims_json
     )
 
 

@@ -1,5 +1,8 @@
 from labler.db import IDatabase
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Claimer(object):
@@ -8,15 +11,26 @@ class Claimer(object):
         self.db: IDatabase = env.db
 
     def claim(self, project: str, user: str):
+        try:
+            return self.try_claim(project, user)
+        except Exception as e:
+            logger.error(f'could not claim: {str(e)}')
+            logger.exception(e)
+            return list()
+
+    def try_claim(self, project, user):
         current_claims = self.db.get_claims(project, user)
 
         if len(current_claims) > 10:
             return current_claims
 
         unclaimed = self.db.get_unclaimed(project, limit=100)
-        to_claim = random.sample(unclaimed, 10)
 
-        claims = self.db.claim_for(to_claim, user)
-        current_claims.extend(claims)
+        k = 10
+        if k > len(unclaimed):
+            k = len(unclaimed)
 
-        return [claim.to_dict() for claim in current_claims]
+        to_claim = random.sample(unclaimed, k)
+
+        self.db.claim_for(to_claim, user)
+        return self.db.get_claims(project, user)

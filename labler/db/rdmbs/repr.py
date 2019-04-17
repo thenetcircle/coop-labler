@@ -38,7 +38,7 @@ class ClaimRepr(object):
     def to_dict(self):
         claimed_at = None
         if self.claimed_at is not None:
-            claimed_at = self.claimed_at.strptime(ConfigKeys.DEFAULT_DATE_FORMAT)
+            claimed_at = self.claimed_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
 
         return {
             ClaimFields.ID: self.id,
@@ -103,7 +103,7 @@ class LabelRepr(object):
     def to_dict(self):
         submitted_at = None
         if self.submitted_at is not None:
-            submitted_at = self.submitted_at.strptime(ConfigKeys.DEFAULT_DATE_FORMAT)
+            submitted_at = self.submitted_at.strftime(ConfigKeys.DEFAULT_DATE_FORMAT)
 
         return {
             LabelFields.ID: self.id or '',

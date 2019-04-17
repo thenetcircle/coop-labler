@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from gnenv.environ import GNEnvironment
 
 from labler.cli import AppSession, errors
-from labler.db import IDatabase
+from labler.db import IDatabase, ClaimRepr
 from labler.db.rdmbs.dbman import Database
 from labler.db.rdmbs.models import Projects, Claims, Labels
 from labler.db.rdmbs.repr import LabelRepr
@@ -64,37 +64,37 @@ class DatabaseRdbms(IDatabase):
         return project is not None
 
     @with_session
-    def _get_all_claims(self, session=None):
+    def _get_all_claims(self, session=None) -> List[ClaimRepr]:
         claims = session.query(Claims).all()
 
-        return [claim.to_dict() for claim in claims]
+        return [claim.to_repr() for claim in claims]
 
     @with_session
-    def _get_claims_for_user(self, user, session=None):
+    def _get_claims_for_user(self, user, session=None) -> List[ClaimRepr]:
         claims = session.query(Claims)\
             .filter_by(claimed_by=user)\
             .all()
 
-        return [claim.to_dict() for claim in claims]
+        return [claim.to_repr() for claim in claims]
 
     @with_session
-    def _get_claims_for_project(self, name, session=None):
+    def _get_claims_for_project(self, name, session=None) -> List[ClaimRepr]:
         claims = session.query(Claims)\
             .filter_by(project_name=name)\
             .all()
 
-        return [claim.to_dict() for claim in claims]
+        return [claim.to_repr() for claim in claims]
 
     @with_session
-    def _get_claims_for_project_and_user(self, name, user, session=None):
+    def _get_claims_for_project_and_user(self, name, user, session=None) -> List[ClaimRepr]:
         claims = session.query(Claims)\
             .filter_by(project_name=name)\
             .filter_by(claimed_by=user)\
             .all()
 
-        return [claim.to_dict() for claim in claims]
+        return [claim.to_repr() for claim in claims]
 
-    def get_claims(self, name=None, user=None) -> List[dict]:
+    def get_claims(self, name=None, user=None) -> List[ClaimRepr]:
         if name is None and user is None:
             return self._get_all_claims()
 
@@ -122,7 +122,7 @@ class DatabaseRdbms(IDatabase):
     @with_session
     def get_unclaimed(self, project, limit=10, session=None) -> List[LabelRepr]:
         labels = session.query(Labels)\
-            .filter_by(project=project)\
+            .filter_by(project_name=project)\
             .filter_by(status=Labels.Statuses.WAITING)\
             .outerjoin(Claims, and_(
                 Labels.project_name == Claims.project_name,
@@ -133,4 +133,17 @@ class DatabaseRdbms(IDatabase):
             .limit(limit)\
             .all()
 
-        return [label.ro_repr() for label in labels]
+        return [label.to_repr() for label in labels]
+
+    @with_session
+    def claim_for(self, to_claim: List[LabelRepr], user: str, session=None) -> None:
+        for label in to_claim:
+            claim = Claims()
+            claim.status = Claims.Statuses.WAITING
+            claim.claimed_by = user
+            claim.project_name = label.project_name
+            claim.file_path = label.file_path
+            claim.file_name = label.file_name
+            session.add(claim)
+
+        session.commit()

@@ -2,7 +2,7 @@ from abc import ABC
 from typing import List
 
 from labler.cli import AppSession
-from labler.db.rdmbs.repr import LabelRepr
+from labler.db.rdmbs.repr import LabelRepr, ClaimRepr
 
 
 class IDatabase(ABC):
@@ -25,4 +25,7 @@ class IDatabase(ABC):
         raise NotImplementedError()
 
     def get_unclaimed(self, project, limit=10, session=None) -> List[LabelRepr]:
+        raise NotImplementedError()
+
+    def claim_for(self, to_claim: List[LabelRepr], user: str, session=None) -> None:
         raise NotImplementedError()
