@@ -4,6 +4,8 @@ from uuid import uuid4 as uuid
 
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from labler.api.claimer import Claimer
@@ -65,6 +67,8 @@ def create_app():
     secret = env.config.get(ConfigKeys.SECRET_KEY, default=str(uuid()))
 
     _app = Flask(import_name=__name__)
+    CORS(_app, resources={r"/api/*": {"origins": "*"}})
+
     _app.wsgi_app = ReverseProxied(ProxyFix(_app.wsgi_app))
     _app.config['SECRET_KEY'] = secret
     env.app = _app
