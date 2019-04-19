@@ -41,7 +41,7 @@ def api_response(code, data: Union[dict, List[dict]] = None, message: Union[dict
         'status_code': code,
         'data': data,
         'message': message
-    })
+    }), code
 
 
 @app.route('/api/', methods=['GET'])
@@ -89,7 +89,7 @@ def claim_new_labels(project, user):
     return api_response(code=200, data=claims_json)
 
 
-@app.route('/api/submit/<claim_id>', methods=['PUT'])
+@app.route('/api/submit/<claim_id>', methods=['POST'])
 def submit_label_for_claim(claim_id):
     if claim_id is None or len(claim_id) == 0:
         return api_response(400, message='blank claim id in submission')

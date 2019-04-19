@@ -5,7 +5,7 @@ import labler
 from labler import errors
 from labler.cli import op
 from labler.cli import opts
-from labler.db.rdmbs.repr import ClaimFields
+from labler.db.rdmbs.repr import ClaimFields, LabelFields
 from labler.errors import FatalException
 from labler.cli.opts import AppSession
 
@@ -91,6 +91,39 @@ def op_claims(app: AppSession, args):
             f'{claim.file_name} \t{claim.status} \t{claim.claimed_by} \t{claimed_at}'.expandtabs(tabsize=20))
 
 
+def op_labels(app: AppSession, args):
+    from labler.environ import env
+
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
+
+    name = args[0]
+    if not env.db.project_exists(name):
+        raise FatalException(f'no project exist with name {name}')
+
+    app.printer.action(f'listing labels for project {name}')
+    labels = env.db.get_labels(name)
+
+    app.printer.blanknotice('')
+    header = 'file name \txmin \txmax \tymin \tymax \tsubmitted by \tsubmitted at'.expandtabs(tabsize=18)
+
+    app.printer.blanknotice(header)
+    app.printer.blanknotice('-' * len(header))
+
+    for label in labels:
+        label_json = label.to_dict()
+        submitted_at = label_json[LabelFields.SUBMITTED_AT]
+        file_name = label.file_name
+        if len(file_name) > 15:
+            file_name = file_name[:12] + '...'
+
+        row_1 = f'{file_name} \t{label.xmin} \t{label.xmax} \t{label.ymin} \t'
+        row_2 = f'{label.ymax} \t{label.submitted_by} \t{submitted_at}'
+        full_row = row_1 + row_2
+
+        app.printer.blanknotice(full_row.expandtabs(tabsize=18))
+
+
 def main(app):
     from labler.environ import create_env
     labler.environ.env = create_env('local', quiet=True)
@@ -111,6 +144,9 @@ def main(app):
 
     elif app.args[0] == 'projects':
         op.operate(app, op_projects)
+
+    elif app.args[0] == 'labels':
+        op.operate(app, op_labels)
 
     elif app.args[0] == 'claims':
         op.operate(app, op_claims)

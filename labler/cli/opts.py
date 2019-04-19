@@ -143,6 +143,8 @@ def usage():
                 Update an existing project
             claims <project name>
                 List claims for a project
+            labels <project name>
+                List labels for a project
             projects
                 List information about all projects
             help
