@@ -153,8 +153,14 @@ def get_image_b64(claim_id):
         return api_response(code=400, message='no such claim')
 
     try:
-        b64image = env.imager.load_b64(claim.file_path, claim.file_name)
-    except Exception:
+        b64image, width, height = env.imager.load_b64_and_dims(claim.file_path, claim.file_name)
+    except Exception as e:
+        logger.error(f'could not load image: {str(e)}')
+        logger.exception(e)
         return api_response(code=500, message='could not load image for claim')
 
-    return api_response(code=200, data={'base64': b64image})
+    return api_response(code=200, data={
+        'base64': b64image,
+        'width': width,
+        'height': height
+    })

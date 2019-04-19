@@ -179,13 +179,21 @@
                 const labler = document.getElementById('labler')
                 const width = data.data[widthKey]
                 const height = data.data[heightKey]
+                const resizeRatio = 600 / height
 
                 img.src = self.base64Flag + data.data[base64Key]
                 img.style.height = '600px'
-                resizeRatio = 600 / height
                 
-                labler.style.height = '600px'
-                labler.style.width = width * resizeRatio
+                const rect = img.getBoundingClientRect();
+                console.log(rect.top, rect.right, rect.bottom, rect.left);
+
+                labler.height = 600
+                labler.width = width * resizeRatio
+                labler.style.position = "absolute";
+                labler.style.left = rect.left + 'px'
+
+                // TODO: for some reason the image shifts 64px up after checking where it is
+                labler.style.top = (rect.top - 64) + 'px'
               })
             },
           )
@@ -264,7 +272,10 @@
 </script>
 
 <style>
-canvas {
-  background: navy;
+canvas#labler {
+  background: rgba(0,0,255,0.5);;
+  position: absolute;
+  top: 2000;
+  left: 0;
 }
 </style>

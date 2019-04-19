@@ -21,5 +21,5 @@ class IClaimer(object):
 
 
 class IImager(object):
-    def load_b64(self, file_path, file_name) -> str:
-        pass
+    def load_b64_and_dims(self, file_path, file_name) -> (str, int, int):
+        raise NotImplementedError()
