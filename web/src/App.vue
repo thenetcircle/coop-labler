@@ -30,14 +30,12 @@
 
 <script>
 import Labler from './components/Labler'
+import canvas from './main.ts'
 
 export default {
   name: 'App',
   components: {
     Labler,
-  },
-  directives: {
-    canvas,
   },
   data() {
     return {

@@ -22,7 +22,7 @@
     div#image-current
       img
       
-    canvas(v-canvas)
+    canvas#labler(v-foobar)
 </template>
 
 <script>
@@ -36,12 +36,128 @@
       imageb64: '',
       current_claim: 0,
       query: '',
-
-      // register the custom directive
-      directives: {
-        canvas,
-      },
     }),
+
+    // register the custom directive
+    directives: {
+      foobar: {
+        inserted(el) {
+          const canvas = el
+          const ctx = canvas.getContext('2d')
+
+          if (ctx === null) {
+            return
+          }
+
+          canvas.width = 1000
+          canvas.height = 800
+
+          ctx.lineJoin = 'round'
+          ctx.lineCap = 'round'
+          ctx.lineWidth = 5
+
+          let prevPos = {
+            offsetX: 0,
+            offsetY: 0,
+          }
+
+          let line = []
+          let isPainting = false
+          const userId = v4()
+          const USER_STROKE = 'red'
+
+          function handleMouseDown(e) {
+            const {
+              offsetX,
+              offsetY,
+            } = e
+            prevPos = {
+              offsetX,
+              offsetY,
+            }
+            isPainting = true
+          }
+
+          function endPaintEvent() {
+            if (isPainting) {
+              isPainting = false
+              sendPaintData()
+            }
+          }
+
+          function handleMouseMove(e) {
+            if (isPainting) {
+              const {
+                offsetX,
+                offsetY,
+              } = e
+
+              const offSetData = {
+                offsetX,
+                offsetY,
+              }
+
+              const positionInfo = {
+                start: {
+                  ...prevPos,
+                },
+                stop: {
+                  ...offSetData,
+                },
+              }
+              line = line.concat(positionInfo)
+              paint(prevPos, offSetData, USER_STROKE)
+            }
+          }
+
+          function sendPaintData() {
+            const body = {
+              line,
+              userId,
+            }
+            fetch('http://localhost:4000/paint', {
+              method: 'post',
+              body: JSON.stringify(body),
+              headers: {
+                'content-type': 'application/json',
+              },
+            }).then(() => (line = []))
+          }
+
+          function paint(prevPosition, currPosition, strokeStyle) {
+            const {
+              offsetX,
+              offsetY,
+            } = currPosition
+
+            const {
+              offsetX: x,
+              offsetY: y,
+            } = prevPosition
+
+            if (ctx === null) {
+              return
+            }
+
+            ctx.beginPath()
+            ctx.strokeStyle = strokeStyle
+            ctx.moveTo(x, y)
+            ctx.lineTo(offsetX, offsetY)
+            ctx.stroke()
+
+            prevPos = {
+              offsetX,
+              offsetY,
+            }
+          }
+
+          canvas.addEventListener('mousedown', handleMouseDown)
+          canvas.addEventListener('mousemove', handleMouseMove)
+          canvas.addEventListener('mouseup', endPaintEvent)
+          canvas.addEventListener('mouseleave', endPaintEvent)
+        },
+      },
+    },
 
     methods: {
       fetchImage(claimId) {
@@ -57,9 +173,19 @@
 
               response.json().then((data) => {
                 const base64Key = 'base64'
+                const heightKey = 'height'
+                const widthKey = 'width'
                 const img = document.querySelector('img')
+                const labler = document.getElementById('labler')
+                const width = data.data[widthKey]
+                const height = data.data[heightKey]
+
                 img.src = self.base64Flag + data.data[base64Key]
                 img.style.height = '600px'
+                resizeRatio = 600 / height
+                
+                labler.style.height = '600px'
+                labler.style.width = width * resizeRatio
               })
             },
           )
