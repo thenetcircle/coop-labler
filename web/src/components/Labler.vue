@@ -12,7 +12,7 @@
     hr 
     br
 
-    span 
+    span#arrow-help 
       b User the arrow keys to change image.
       
     div#image-current
@@ -234,6 +234,7 @@
                 self.claims = data.data
                 self.currentClaimId = self.claims[0].id
                 self.currentClaim = -1
+                document.getElementById('arrow-help').style.display = 'block'
 
                 // TODO: if we set currentClaim to 0 and fetch it here, the
                 // x/y submitted will be wrong for some reason. Instead, for
@@ -304,5 +305,9 @@ canvas#labler {
   position: absolute;
   top: 2000;
   left: 0;
+}
+
+span#arrow-help {
+  display: none;
 }
 </style>
