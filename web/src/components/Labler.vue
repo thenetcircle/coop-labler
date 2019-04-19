@@ -83,6 +83,9 @@
             isPainting = true
           }
 
+          // TODO: should be able to draw multiple rectangles
+          // on a single image, and they should load agin when
+          // going back to a previous image
           function endPaintEvent() {
             if (isPainting) {
               isPainting = false
@@ -122,7 +125,7 @@
             }
             console.log(body)
 
-            // TODO: only submit when changing picture
+            // TODO: only submit when changing picture, IF any labels have changed
             fetch('http://localhost:4343/api/submit/' + vself.currentClaimId, {
               method: 'post',
               body: JSON.stringify(body),
