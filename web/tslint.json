@@ -12,6 +12,8 @@
     "quotemark": [true, "single"],
     "indent": [true, "spaces", 2],
     "interface-name": false,
+    "no-console": false,
+    "one-line": false,
     "ordered-imports": false,
     "object-literal-sort-keys": false,
     "no-consecutive-blank-lines": false,

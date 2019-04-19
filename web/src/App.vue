@@ -34,12 +34,15 @@ import Labler from './components/Labler'
 export default {
   name: 'App',
   components: {
-    Labler
+    Labler,
   },
-  data () {
+  directives: {
+    canvas,
+  },
+  data() {
     return {
       //
     }
-  }
+  },
 }
 </script>
