@@ -4,44 +4,42 @@
       v-for="item in items"
       :key="item.project_name"
     )
-      h1 {{ item.project_name }}
-      p {{ item.project_type }}
-      button(@click="fetchClaims(item.project_name, 'a-user')") Start labling
+      h1 Project: {{ item.project_name }}
+      p Project Type: {{ item.project_type }}
+      a(@click="fetchClaims(item.project_name, userName)") Start labling
     
     br 
     hr 
     br
 
-    div#images
-      span(
-        v-for="claim in claims"
-        :key="claim.id"
-      )
-        i {{ claim.file_path }}/{{ claim.file_name }} | 
+    span 
+      b User the arrow keys to change image.
       
     div#image-current
       img
       
-    canvas#labler(v-foobar)
+    canvas#labler(v-labler)
 </template>
 
 <script>
-  import { v4 } from 'uuid'
-
   export default {
     data: () => ({
       items: [],
       claims: [],
       base64Flag: 'data:image/jpeg;base64,',
       imageb64: '',
-      current_claim: 0,
+      currentClaim: 0,
+      currentClaimId: 0,
       query: '',
+      userId: 1234,
+      userName: 'a-user',
     }),
 
     // register the custom directive
     directives: {
-      foobar: {
-        inserted(el) {
+      labler: {
+        inserted(el, binding, vnode) {
+          const self = this
           const canvas = el
           const ctx = canvas.getContext('2d')
 
@@ -56,14 +54,17 @@
           ctx.lineCap = 'round'
           ctx.lineWidth = 5
 
-          let prevPos = {
+          let startPos = {
+            offsetX: 0,
+            offsetY: 0,
+          }
+          let offsetPos = {
             offsetX: 0,
             offsetY: 0,
           }
 
           let line = []
           let isPainting = false
-          const userId = v4()
           const USER_STROKE = 'red'
 
           function handleMouseDown(e) {
@@ -71,7 +72,11 @@
               offsetX,
               offsetY,
             } = e
-            prevPos = {
+            const {
+              startX,
+              startY,
+            } = e
+            startPos = {
               offsetX,
               offsetY,
             }
@@ -92,30 +97,33 @@
                 offsetY,
               } = e
 
-              const offSetData = {
+              offsetPos = {
                 offsetX,
                 offsetY,
               }
 
-              const positionInfo = {
-                start: {
-                  ...prevPos,
-                },
-                stop: {
-                  ...offSetData,
-                },
-              }
-              line = line.concat(positionInfo)
-              paint(prevPos, offSetData, USER_STROKE)
+              paint(offsetPos, USER_STROKE)
             }
           }
 
           function sendPaintData() {
+            const vself = vnode.context
+            const userId = vnode.context.userId
+
             const body = {
-              line,
-              userId,
+              xmin: Math.floor(startPos.offsetX / vself.resizeRatio),
+              ymin: Math.floor(startPos.offsetY / vself.resizeRatio),
+              xmax: Math.floor(offsetPos.offsetX / vself.resizeRatio),
+              ymax: Math.floor(offsetPos.offsetY / vself.resizeRatio),
+              resize: vself.resizeRatio,
+              project_type: 'localization',
+              user_id: vself.userId,
+              target_class: 0,
             }
-            fetch('http://localhost:4000/paint', {
+            console.log(body)
+
+            // TODO: only submit when changing picture
+            fetch('http://localhost:4343/api/submit/' + vself.currentClaimId, {
               method: 'post',
               body: JSON.stringify(body),
               headers: {
@@ -124,7 +132,7 @@
             }).then(() => (line = []))
           }
 
-          function paint(prevPosition, currPosition, strokeStyle) {
+          function paint(currPosition, strokeStyle) {
             const {
               offsetX,
               offsetY,
@@ -133,22 +141,29 @@
             const {
               offsetX: x,
               offsetY: y,
-            } = prevPosition
+            } = startPos
 
             if (ctx === null) {
               return
             }
 
+            // beginPath is needed, otherwise the previous rectangles won't be cleared
             ctx.beginPath()
-            ctx.strokeStyle = strokeStyle
-            ctx.moveTo(x, y)
-            ctx.lineTo(offsetX, offsetY)
-            ctx.stroke()
 
-            prevPos = {
-              offsetX,
-              offsetY,
-            }
+            // store the current transformation matrix
+            ctx.save()
+
+            // use the identity matrix while clearing the canvas
+            ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+            // restore the transform
+            ctx.restore()
+
+            // draw our current rectable from origin to current mouse position
+            ctx.rect(x, y, offsetX - x, offsetY - y)
+            ctx.strokeStyle = strokeStyle
+            ctx.stroke()
           }
 
           canvas.addEventListener('mousedown', handleMouseDown)
@@ -179,17 +194,17 @@
                 const labler = document.getElementById('labler')
                 const width = data.data[widthKey]
                 const height = data.data[heightKey]
-                const resizeRatio = 600 / height
+                self.resizeRatio = 600 / height
 
                 img.src = self.base64Flag + data.data[base64Key]
                 img.style.height = '600px'
-                
-                const rect = img.getBoundingClientRect();
-                console.log(rect.top, rect.right, rect.bottom, rect.left);
+
+                const rect = img.getBoundingClientRect()
+                console.log(rect.top, rect.right, rect.bottom, rect.left)
 
                 labler.height = 600
-                labler.width = width * resizeRatio
-                labler.style.position = "absolute";
+                labler.width = width * self.resizeRatio
+                labler.style.position = 'absolute'
                 labler.style.left = rect.left + 'px'
 
                 // TODO: for some reason the image shifts 64px up after checking where it is
@@ -215,9 +230,16 @@
 
               response.json().then((data) => {
                 console.log(data.data)
+
                 self.claims = data.data
-                self.fetchImage(self.claims[0].id)
-                self.current_claim = 0
+                self.currentClaimId = self.claims[0].id
+                self.currentClaim = -1
+
+                // TODO: if we set currentClaim to 0 and fetch it here, the
+                // x/y submitted will be wrong for some reason. Instead, for
+                // now, force the user to use the arrow keys to begin... Turns
+                // out the coordinates will be correct because of this.
+                // self.fetchImage(self.currentClaimId)
               })
             },
           )
@@ -233,20 +255,20 @@
         const key = e.which || e.keyCode
 
         if (key === 39) { // right
-          self.current_claim++
-          if (self.current_claim >= self.claims.length) {
-            self.current_claim = self.claims.length - 1
+          self.currentClaim++
+          if (self.currentClaim >= self.claims.length) {
+            self.currentClaim = self.claims.length - 1
             return
           }
-          self.fetchImage(self.claims[self.current_claim].id)
+          self.fetchImage(self.claims[self.currentClaim].id)
         }
         else if (key === 37) { // left
-          self.current_claim--
-          if (self.current_claim < 0) {
-            self.current_claim = 0
+          self.currentClaim--
+          if (self.currentClaim < 0) {
+            self.currentClaim = 0
             return
           }
-          self.fetchImage(self.claims[self.current_claim].id)
+          self.fetchImage(self.claims[self.currentClaim].id)
         }
       })
 
@@ -272,8 +294,13 @@
 </script>
 
 <style>
+div#app {
+  padding-left: 25px;
+  padding-top: 25px;
+}
+
 canvas#labler {
-  background: rgba(0,0,255,0.5);;
+  background: rgba(0,0,255,0.0);
   position: absolute;
   top: 2000;
   left: 0;
