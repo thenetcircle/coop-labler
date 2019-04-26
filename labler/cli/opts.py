@@ -1,5 +1,6 @@
 import getopt
 import sys
+import os
 
 version_str = 'Coop-Labler version {}'
 
@@ -76,6 +77,9 @@ class AppSession:
                 self.lambdaenv.suppressed = {'all'}
 
             elif opt in ('-d', '--directory'):
+                if not os.path.exists(arg):
+                    raise errors.FatalException(f'data directory "{arg}" does not exist')
+
                 self.lambdaenv.directory = arg
 
             elif opt in ('-v', '--verbose'):
@@ -132,13 +136,15 @@ def usage():
             --classes (or -c):
                 Specify how many classes a project has.
             --dir (or -d):
-                Specify where the training data exists for this project (local fs only a of now) 
+                Specify where the training data exists for this project (local fs only as of now) 
             --type (or -t):
                 Specify the type of project, one of [{project_types}]
 
         Operations:
             create <project name>
                 Create a new project
+            add <project name>
+                Add training data to project
             update <project name>
                 Update an existing project
             claims <project name>

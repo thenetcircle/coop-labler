@@ -1,4 +1,5 @@
 import sys
+import os
 import traceback
 
 import labler
@@ -25,6 +26,35 @@ def op_create(app: AppSession, args):
     else:
         app.printer.action(f'creating project: {name}')
         env.db.create_project(name, app)
+
+
+def op_add(app: AppSession, args):
+    from labler.environ import env
+
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
+
+    name = args[0]
+    data_dir = app.lambdaenv.directory
+    if data_dir is None:
+        raise FatalException('no data directory supplied when suing add command')
+
+    if not os.path.exists(data_dir):
+        raise errors.FatalException(f'data dir "{data_dir}" does not exist')
+
+    if not os.access(data_dir, os.R_OK):
+        raise errors.FatalException(f'no read permission on data dir "{data_dir}"')
+
+    if not os.access(data_dir, os.X_OK):
+        raise errors.FatalException(f'no execute permission on data dir "{data_dir}"')
+
+    if app.lambdaenv.pretend:
+        app.printer.notice(f'would add directory "{data_dir}" to project called {name}')
+    else:
+        app.printer.action(f'adding directly "{data_dir}" to project: {name}')
+        env.db.add_data_dir(name, app)
+
+    env.data_handler.add_data_dir(name, app, data_dir)
 
 
 def op_update(app: AppSession, args):
@@ -63,6 +93,29 @@ def op_projects(app: AppSession, _):
 
         app.printer.blanknotice(
             f'{pname} \t{ptype} \t{pcls} \t{pdir}'.expandtabs(tabsize=20))
+
+
+def op_examples(app: AppSession, args):
+    from labler.environ import env
+
+    project_name = args[0]
+
+    app.printer.action(f'listing examples for project {project_name}')
+    examples = env.db.get_examples(project_name)
+
+    app.printer.blanknotice('')
+    header = 'width \theight \tfile path \tfile name'.expandtabs(tabsize=20)
+    app.printer.blanknotice(header)
+    app.printer.blanknotice('-' * len(header))
+
+    for example in examples:
+        file_path = example.file_path
+        file_name = example.file_name
+        width = example.width
+        height = example.height
+
+        app.printer.blanknotice(
+            f'{width} \t{height} \t{file_path} \t{file_name}'.expandtabs(tabsize=20))
 
 
 def op_claims(app: AppSession, args):
@@ -139,6 +192,9 @@ def main(app):
     elif app.args[0] == 'create':
         op.operate(app, op_create)
 
+    elif app.args[0] == 'add':
+        op.operate(app, op_add)
+
     elif app.args[0] == 'update':
         op.operate(app, op_update)
 
@@ -147,6 +203,9 @@ def main(app):
 
     elif app.args[0] == 'labels':
         op.operate(app, op_labels)
+
+    elif app.args[0] == 'examples':
+        op.operate(app, op_examples)
 
     elif app.args[0] == 'claims':
         op.operate(app, op_claims)

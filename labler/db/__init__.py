@@ -1,12 +1,26 @@
 from abc import ABC
-from typing import List
+from typing import List, Tuple
 
 from labler.cli.opts import AppSession
-from labler.db.rdmbs.repr import LabelRepr, ClaimRepr, ProjectRepr
+from labler.db.rdmbs.repr import LabelRepr, ClaimRepr, ProjectRepr, ExampleRepr
 
 
 class IDatabase(ABC):
     def create_project(self, name, app: AppSession) -> None:
+        raise NotImplementedError()
+
+    def add_data_dir(self, name, app: AppSession) -> None:
+        raise NotImplementedError()
+
+    def add_examples(self, project_name: str, app: AppSession, examples: List[Tuple[str, str, int, int]]) -> None:
+        """
+        :param project_name:
+        :param app:
+        :param examples: [(base_path, file_name, width, height)]
+        :return:
+        """
+
+    def get_examples(self, project_name: str) -> List[ExampleRepr]:
         raise NotImplementedError()
 
     def update_project(self, name, app: AppSession) -> None:

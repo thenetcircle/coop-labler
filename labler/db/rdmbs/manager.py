@@ -1,15 +1,16 @@
+import os
 from functools import wraps
-from typing import List, Union
-from sqlalchemy import and_
+from typing import List, Union, Tuple
 
 from gnenv.environ import GNEnvironment
+from sqlalchemy import and_
 
-from labler.cli import AppSession
 from labler import errors
-from labler.db import IDatabase, ClaimRepr, ProjectRepr
+from labler.cli import AppSession
+from labler.db import IDatabase, ClaimRepr, ProjectRepr, ExampleRepr
 from labler.db.rdmbs.dbman import Database
 from labler.db.rdmbs.models import Projects, Claims, Labels, Examples
-from labler.db.rdmbs.repr import LabelRepr, ClaimStatuses, LabelStatuses
+from labler.db.rdmbs.repr import LabelRepr, ClaimStatuses
 
 
 def with_session(view_func):
@@ -42,6 +43,64 @@ class DatabaseRdbms(IDatabase):
         project.project_type = app.lambdaenv.project_type or 'classification'
         project.directory = app.lambdaenv.directory
 
+        session.add(project)
+        session.commit()
+
+    @with_session
+    def add_examples(
+            self,
+            project_name: str,
+            app: AppSession,
+            examples: List[Tuple[str, str, int, int]],
+            session=None
+    ) -> None:
+        project = session.query(Projects).filter_by(project_name=project_name).first()
+        if project is None:
+            raise errors.FatalException(f'no project exist for name {project_name}')
+
+        for base_path, file_name, width, height in examples:
+            existing_example = session.query(Examples)\
+                .filter_by(project_name=project_name)\
+                .filter_by(file_path=base_path)\
+                .filter_by(file_name=file_name)\
+                .first()
+
+            if existing_example is not None:
+                if app.lambdaenv.verbose:
+                    app.printer.notice(
+                        f'example for {base_path}{os.path.sep}{file_name} exists, not adding again')
+                continue
+
+            if app.lambdaenv.pretend:
+                continue
+
+            example = Examples()
+            example.project_name = project_name
+            example.file_path = base_path
+            example.file_name = file_name
+            example.width = width
+            example.height = height
+            session.add(example)
+
+        session.commit()
+
+    @with_session
+    def get_examples(self, project_name: str, session=None) -> List[ExampleRepr]:
+        examples = session.query(Examples).filter_by(project_name=project_name).all()
+        return [e.to_repr() for e in examples]
+
+    @with_session
+    def add_data_dir(self, name, app: AppSession, session=None) -> None:
+        project = session.query(Projects).filter_by(project_name=name).first()
+        if project is None:
+            raise errors.FatalException(f'no project exist for name {name}')
+
+        lambda_dir = app.lambdaenv.directory
+        if lambda_dir is None:
+            return
+
+        directory = project.directory or ''
+        project.directory = ';'.join([lambda_dir] + directory.split(';'))
         session.add(project)
         session.commit()
 
