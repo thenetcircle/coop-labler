@@ -100,7 +100,7 @@ class DatabaseRdbms(IDatabase):
             return
 
         directory = project.directory or ''
-        project.directory = ';'.join([lambda_dir] + directory.split(';'))
+        project.directory = ';'.join(set([lambda_dir] + directory.split(';')))
         session.add(project)
         session.commit()
 
