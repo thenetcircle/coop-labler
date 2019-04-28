@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 import traceback
 
 from labler.cli import AppSession
@@ -33,6 +34,34 @@ class DataHandler(IDataHandler):
                 else:
                     app.printer.warning(f'example for {full_path} does not exist, disabling')
                     self.env.db.disable_example(example)
+
+    def export_labels(self, project_name: str, app: AppSession, output_dir: str) -> None:
+        labels = self.env.db.get_labels(project_name)
+        labels_per_name = dict()
+
+        for label in labels:
+            bbox = ','.join(map(str, [label.xmin, label.xmax, label.ymin, label.ymax, label.target_class]))
+            if label.file_name not in labels_per_name:
+                labels_per_name[label.file_name] = bbox
+                continue
+
+            existing_bbox = labels_per_name[label.file_name]
+            labels_per_name[label.file_name] = f'{existing_bbox} {bbox}'
+
+        for label_name, bboxes in labels_per_name.items():
+            label_name = label_name.rsplit('.', maxsplit=1)[0]
+            label_name = label_name + '.txt'
+
+            output_file = os.path.join(output_dir, label_name)
+            if os.path.exists(output_file):
+                if app.lambdaenv.overwrite:
+                    os.remove(output_file)
+                else:
+                    app.printer.warning(f'file {output_file} already exists, skipping (overwrite with --overwrite/-o)')
+                    continue
+
+            with open(os.path.join(output_dir, label_name), 'w') as f:
+                f.write(f'{label_name} {bboxes}')
 
     def add_data_dir(self, project_name: str, app: AppSession, data_dir: str) -> None:
         batch = list()

@@ -35,6 +35,35 @@ def op_sync(app: AppSession, args):
             raise errors.FatalException(f'could not sync project dir "{data_dir}": {str(e)}')
 
 
+def op_export(app: AppSession, args):
+    from labler.environ import env
+
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
+
+    name = args[0]
+    directory = app.lambdaenv.directory
+
+    if directory is None:
+        raise errors.FatalException('no output directory specified (--dir/-d)')
+
+    if not os.path.exists(directory):
+        raise errors.FatalException(f'output directory {directory} does not exist')
+
+    if not os.access(directory, os.W_OK):
+        raise errors.FatalException(f'no write permission for output directory {directory}')
+
+    if not os.access(directory, os.X_OK):
+        raise errors.FatalException(f'no execute permission for output directory {directory}')
+
+    if app.lambdaenv.pretend:
+        app.printer.notice(f'would export labels for project {name} to {directory}')
+    else:
+        app.printer.action(f'exporting labels for project {name} to {directory}')
+
+    env.data_handler.export_labels(name, app, directory)
+
+
 def op_create(app: AppSession, args):
     from labler.environ import env
 
@@ -233,6 +262,9 @@ def main(app):
 
     elif app.args[0] == 'examples':
         op.operate(app, op_examples)
+
+    elif app.args[0] == 'export':
+        op.operate(app, op_export)
 
     elif app.args[0] == 'sync':
         op.operate(app, op_sync)

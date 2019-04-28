@@ -23,6 +23,7 @@ LambdaTemplate = {
     'classes': None,
     'project_type': None,
     'directory': None,
+    'overwrite': False,
 }
 
 
@@ -33,16 +34,17 @@ class AppSession:
         try:
             opts, argv = getopt.gnu_getopt(
                 argv,
-                'pVsvhc:t:d:',
+                'pVsvohc:t:d:',
                 [
                     'pretend',
                     'version',
                     'silent',
                     'verbose',
+                    'overwrite',
                     'help',
                     'classes=',
                     'type=',
-                    'directory=',
+                    'dir='
                 ]
             )
 
@@ -76,15 +78,18 @@ class AppSession:
                 self.lambdaenv.silent = True
                 self.lambdaenv.suppressed = {'all'}
 
-            elif opt in ('-d', '--directory'):
+            elif opt in ('-d', '--dir'):
                 if not os.path.exists(arg):
-                    raise errors.FatalException(f'data directory "{arg}" does not exist')
+                    raise errors.FatalException(f'directory "{arg}" does not exist')
 
                 self.lambdaenv.directory = arg
 
             elif opt in ('-v', '--verbose'):
                 self.lambdaenv.verbose = True
                 self.lambdaenv.suppressed = set()
+
+            elif opt in ('-o', '--overwrite'):
+                self.lambdaenv.overwrite = True
 
             elif opt in ('-c', '--classes'):
                 try:
@@ -133,10 +138,13 @@ def usage():
                 Suppresses what is defined in 'suppressed'.
             --verbose (or -v):
                 Makes labler more talkative.
+            --overwrite (or -o):
+                Overwrites output files when exporting if they already exist.
             --classes (or -c):
                 Specify how many classes a project has.
             --dir (or -d):
-                Specify where the training data exists for this project (local fs only as of now) 
+                Specify where the training data exists for this project (local 
+                fs only as of now), or where to export labels to. 
             --type (or -t):
                 Specify the type of project, one of [{project_types}]
 
@@ -149,6 +157,8 @@ def usage():
                 Update an existing project
             claims <project name>
                 List claims for a project
+            export <project name>
+                Export labels to files
             sync <project name>
                 Sync all data directories fo a project, disabling examples of images no longer in the FS
             examples <project name>
