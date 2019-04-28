@@ -31,6 +31,7 @@ class Examples(DeclarativeBase):
     file_path = Column('file_path', String(256), nullable=False, index=True, unique=False)
     file_name = Column('file_name', String(256), nullable=False, index=True, unique=False)
     project_name = Column('project_name', String(256), nullable=False, index=True, unique=False)
+    disabled = Column('disabled', Boolean, nullable=False, index=True, unique=False, server_default=text('false'))
 
     width = Column('width', Integer, nullable=False)
     height = Column('height', Integer, nullable=False)
@@ -40,6 +41,7 @@ class Examples(DeclarativeBase):
             _id=self.id,
             file_path=self.file_path,
             file_name=self.file_name,
+            disabled=self.disabled,
             project_name=self.project_name,
             width=self.width,
             height=self.height

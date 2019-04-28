@@ -7,6 +7,7 @@ class ExampleFields(object):
     ID = 'id'
     FILE_PATH = 'file_path'
     FILE_NAME = 'file_name'
+    DISABLED = 'disabled'
     PROJECT_NAME = 'project_name'
     WIDTH = 'width'
     HEIGHT = 'height'
@@ -18,6 +19,7 @@ class ExampleRepr(object):
             _id: int = None,
             file_path: str = None,
             file_name: str = None,
+            disabled: bool = None,
             project_name: str = None,
             width: int = None,
             height: int = None,
@@ -25,6 +27,7 @@ class ExampleRepr(object):
         self.id = _id
         self.file_path = file_path
         self.file_name = file_name
+        self.disabled = disabled
         self.project_name = project_name
         self.width = width
         self.height = height
@@ -34,6 +37,7 @@ class ExampleRepr(object):
             ExampleFields.ID: self.id or '',
             ExampleFields.FILE_PATH: self.file_path or '',
             ExampleFields.FILE_NAME: self.file_name or '',
+            ExampleFields.DISABLED: self.disabled or '',
             ExampleFields.PROJECT_NAME: self.project_name or '',
             ExampleFields.WIDTH: self.width or '',
             ExampleFields.HEIGHT: self.height or '',

@@ -11,6 +11,30 @@ from labler.errors import FatalException
 from labler.cli.opts import AppSession
 
 
+def op_sync(app: AppSession, args):
+    from labler.environ import env
+
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
+
+    project_name = args[0]
+    if not env.db.project_exists(project_name):
+        raise FatalException(f'project with name "{project_name}" does not exist')
+
+    if app.lambdaenv.pretend:
+        app.printer.notice(f'would sync project {project_name}')
+    else:
+        app.printer.action(f'syncing project: {project_name}')
+
+    data_dirs = env.db.get_data_dirs(project_name)
+    for data_dir in data_dirs:
+        try:
+            env.data_handler.sync_data_dir(project_name, app, data_dir)
+        except Exception as e:
+            print(traceback.format_exc())
+            raise errors.FatalException(f'could not sync project dir "{data_dir}": {str(e)}')
+
+
 def op_create(app: AppSession, args):
     from labler.environ import env
 
@@ -97,6 +121,9 @@ def op_projects(app: AppSession, _):
 
 def op_examples(app: AppSession, args):
     from labler.environ import env
+
+    if len(args) == 0:
+        raise errors.FatalException('no project name specified')
 
     project_name = args[0]
 
@@ -206,6 +233,9 @@ def main(app):
 
     elif app.args[0] == 'examples':
         op.operate(app, op_examples)
+
+    elif app.args[0] == 'sync':
+        op.operate(app, op_sync)
 
     elif app.args[0] == 'claims':
         op.operate(app, op_claims)

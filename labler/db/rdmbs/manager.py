@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Set
 
 from gnenv.environ import GNEnvironment
 from sqlalchemy import and_
@@ -47,6 +47,14 @@ class DatabaseRdbms(IDatabase):
         session.commit()
 
     @with_session
+    def get_data_dirs(self, project_name, session=None) -> Set[str]:
+        project = session.query(Projects).filter_by(project_name=project_name).first()
+        if project is None:
+            raise errors.FatalException(f'no project exist for name {project_name}')
+
+        return set(project.directory.split(';'))
+
+    @with_session
     def add_examples(
             self,
             project_name: str,
@@ -66,11 +74,7 @@ class DatabaseRdbms(IDatabase):
                 .first()
 
             if existing_example is not None:
-                if app.lambdaenv.verbose:
-                    app.printer.notice(
-                        f'example for {base_path}{os.path.sep}{file_name} exists, not adding again')
                 continue
-
             if app.lambdaenv.pretend:
                 continue
 
@@ -85,9 +89,36 @@ class DatabaseRdbms(IDatabase):
         session.commit()
 
     @with_session
-    def get_examples(self, project_name: str, session=None) -> List[ExampleRepr]:
-        examples = session.query(Examples).filter_by(project_name=project_name).all()
+    def get_examples(
+            self,
+            project_name: str,
+            file_path: str = None,
+            disabled: bool = False,
+            session=None
+    ) -> List[ExampleRepr]:
+        if file_path is None:
+            examples = session.query(Examples)\
+                .filter_by(project_name=project_name)\
+                .filter_by(disabled=disabled)\
+                .all()
+        else:
+            examples = session.query(Examples)\
+                .filter_by(project_name=project_name)\
+                .filter_by(disabled=disabled)\
+                .filter_by(file_path=file_path)\
+                .all()
+
         return [e.to_repr() for e in examples]
+
+    @with_session
+    def disable_example(self, example: ExampleRepr, session=None) -> None:
+        example = session.query(Examples).filter_by(id=example.id).first()
+        if example is None:
+            return
+
+        example.disabled = True
+        session.add(example)
+        session.commit()
 
     @with_session
     def add_data_dir(self, name, app: AppSession, session=None) -> None:

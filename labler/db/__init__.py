@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 from labler.cli.opts import AppSession
 from labler.db.rdmbs.repr import LabelRepr, ClaimRepr, ProjectRepr, ExampleRepr
@@ -12,6 +12,9 @@ class IDatabase(ABC):
     def add_data_dir(self, name, app: AppSession) -> None:
         raise NotImplementedError()
 
+    def get_data_dirs(self, project_name) -> Set[str]:
+        raise NotImplementedError()
+
     def add_examples(self, project_name: str, app: AppSession, examples: List[Tuple[str, str, int, int]]) -> None:
         """
         :param project_name:
@@ -20,7 +23,10 @@ class IDatabase(ABC):
         :return:
         """
 
-    def get_examples(self, project_name: str) -> List[ExampleRepr]:
+    def get_examples(self, project_name: str, file_path: str = None, disabled: bool = False) -> List[ExampleRepr]:
+        raise NotImplementedError()
+
+    def disable_example(self, example: ExampleRepr) -> None:
         raise NotImplementedError()
 
     def update_project(self, name, app: AppSession) -> None:

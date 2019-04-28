@@ -149,6 +149,10 @@ def usage():
                 Update an existing project
             claims <project name>
                 List claims for a project
+            sync <project name>
+                Sync all data directories fo a project, disabling examples of images no longer in the FS
+            examples <project name>
+                List examples for a project
             labels <project name>
                 List labels for a project
             projects

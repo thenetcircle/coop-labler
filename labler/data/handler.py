@@ -7,6 +7,7 @@ from labler.data import IDataHandler
 
 from PIL import Image
 from PIL import ImageFile
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
@@ -14,7 +15,24 @@ class DataHandler(IDataHandler):
     EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
     def __init__(self, env):
-        self.env = env
+        from labler.environ import LablerEnvironment
+        self.env: LablerEnvironment = env
+
+    def sync_data_dir(self, project_name: str, app: AppSession, data_dir: str) -> None:
+        all_examples = self.env.db.get_examples(project_name)
+        examples = [example for example in all_examples if example.file_path.startswith(data_dir)]
+
+        if len(examples) == 0:
+            return
+
+        for example in examples:
+            full_path = os.path.sep.join([example.file_path, example.file_name])
+            if not os.path.exists(full_path):
+                if app.lambdaenv.pretend:
+                    app.printer.notice(f'example for {full_path} does not exist, would disable')
+                else:
+                    app.printer.warning(f'example for {full_path} does not exist, disabling')
+                    self.env.db.disable_example(example)
 
     def add_data_dir(self, project_name: str, app: AppSession, data_dir: str) -> None:
         batch = list()
