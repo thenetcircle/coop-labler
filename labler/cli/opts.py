@@ -19,8 +19,10 @@ LambdaTemplate = {
     'suppressed': set(),
     'pretend': False,
     'silent': False,
+    'cores': 1,
     'verbose': True,
     'classes': None,
+    'output': None,
     'project_type': None,
     'directory': None,
     'overwrite': False,
@@ -34,7 +36,7 @@ class AppSession:
         try:
             opts, argv = getopt.gnu_getopt(
                 argv,
-                'pVsvohc:t:d:',
+                'pVsvohc:t:d:C:O:',
                 [
                     'pretend',
                     'version',
@@ -44,7 +46,9 @@ class AppSession:
                     'help',
                     'classes=',
                     'type=',
-                    'dir='
+                    'dir=',
+                    'cores=',
+                    'output='
                 ]
             )
 
@@ -88,8 +92,23 @@ class AppSession:
                 self.lambdaenv.verbose = True
                 self.lambdaenv.suppressed = set()
 
+            elif opt in ('-C', '--cores'):
+                try:
+                    cores = int(arg)
+                except ValueError:
+                    raise errors.FatalException(f'argument "{arg}" not a valid number of cores')
+                if cores < 1:
+                    cores = -1
+                self.lambdaenv.cores = cores
+
             elif opt in ('-o', '--overwrite'):
                 self.lambdaenv.overwrite = True
+
+            elif opt in ('-O', '--output'):
+                if not os.path.exists(arg):
+                    raise errors.FatalException(f'output directory "{arg}" does not exist')
+
+                self.lambdaenv.output = arg
 
             elif opt in ('-c', '--classes'):
                 try:
@@ -142,6 +161,8 @@ def usage():
                 Overwrites output files when exporting if they already exist.
             --classes (or -c):
                 Specify how many classes a project has.
+            --cores (or -C):
+                Number of CPU cores to use when processing training data.
             --dir (or -d):
                 Specify where the training data exists for this project (local 
                 fs only as of now), or where to export labels to. 
