@@ -143,7 +143,6 @@ def submit_label_for_claim(claim_id):
 def get_overview(project_name):
     examples = env.db.get_examples(project_name)
     labels = env.db.get_labels(project_name)
-    output = list()
 
     labels_by_name = dict()
     for label in labels:
@@ -159,6 +158,11 @@ def get_overview(project_name):
         else:
             labels_by_name[label.file_name].append(json_label)
 
+    output = {
+        'done': list(),
+        'remaining': list()
+    }
+
     for example in examples:
         try:
             filename = example.file_name
@@ -173,12 +177,18 @@ def get_overview(project_name):
                 labels_for_image = labels_by_name[filename]
 
             b64image, width, height = env.imager.load_b64_and_dims(example.file_path, rz_file_name)
-            output.append({
+            json_image = {
                 'base64': b64image,
                 'width': width,
                 'height': height,
                 'labels': labels_for_image
-            })
+            }
+
+            if len(labels_for_image) == 0:
+                output['remaining'].append(json_image)
+            else:
+                output['done'].append(json_image)
+
         except Exception as e:
             logger.error(f'could not get thumbnail: {str(e)}')
             logger.exception(e)
