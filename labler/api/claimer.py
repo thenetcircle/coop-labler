@@ -43,6 +43,17 @@ class Claimer(IClaimer):
         return self.db.get_claims(project, user)
 
     def submit_localization(self, claim_id, content: dict) -> None:
+        claim = self.db.get_claim(claim_id)
+        if claim is None:
+            raise errors.LablerException(f'no claim found for claim ID {claim_id}')
+
+        json_labels = content.get('labels')
+        for json_label in json_labels:
+            self._submit_localization(claim, json_label)
+
+        self.db.finish_claim(claim_id)
+
+    def _submit_localization(self, claim: ClaimRepr, content: dict) -> None:
         xmin = content.get('xmin', None)
         xmax = content.get('xmax', None)
         ymin = content.get('ymin', None)
@@ -55,10 +66,6 @@ class Claimer(IClaimer):
 
         if None in (xmin, xmax, ymin, ymax):
             raise errors.LablerException(f'found null coordinate in data')
-
-        claim = self.db.get_claim(claim_id)
-        if claim is None:
-            raise errors.LablerException(f'no claim found for claim ID {claim_id}')
 
         target_class = content.get('target_class', None)
         if target_class is None:
@@ -78,7 +85,6 @@ class Claimer(IClaimer):
         )
 
         self.db.create_label_localization_or_detection(label)
-        self.db.finish_claim(claim_id)
 
     def submit_segmentation(self, claim_id, content) -> None:
         raise NotImplementedError()

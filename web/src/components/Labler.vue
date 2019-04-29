@@ -114,14 +114,17 @@
             const userId = vnode.context.userId
 
             const body = {
-              xmin: Math.floor(startPos.offsetX / vself.resizeRatio),
-              ymin: Math.floor(startPos.offsetY / vself.resizeRatio),
-              xmax: Math.floor(offsetPos.offsetX / vself.resizeRatio),
-              ymax: Math.floor(offsetPos.offsetY / vself.resizeRatio),
+              // list of labels, each can have different target_class
+              labels: [{
+                xmin: Math.floor(startPos.offsetX / vself.resizeRatio),
+                ymin: Math.floor(startPos.offsetY / vself.resizeRatio),
+                xmax: Math.floor(offsetPos.offsetX / vself.resizeRatio),
+                ymax: Math.floor(offsetPos.offsetY / vself.resizeRatio),
+                target_class: 0,
+              }],
               resize: vself.resizeRatio,
               project_type: 'localization',
               user_id: vself.userId,
-              target_class: 0,
             }
             console.log(body)
 
