@@ -11,6 +11,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from labler.api.claimer import Claimer
 from labler.api.imager import Imager
 from labler.config import ConfigKeys
+from labler.data.handler import DataHandler
+from labler.db.rdmbs.manager import DatabaseRdbms
 
 logging.basicConfig(
     level=getattr(logging, os.environ.get('LOG_LEVEL', 'DEBUG')),
@@ -62,8 +64,6 @@ def create_app():
 
     environment = os.environ.get('LB_ENVIRONMENT', default=None)
     env = create_env(environment, quiet=False)
-    env.claimer = Claimer(env)
-    env.imager = Imager(env)
     labler.environ.env = env
 
     secret = env.config.get(ConfigKeys.SECRET_KEY, default=str(uuid()))
