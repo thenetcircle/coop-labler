@@ -10,6 +10,7 @@ from git.cmd import Git
 
 from labler import errors
 from labler.config import ProjectTypes
+from labler.db.rdmbs.repr import LabelFields
 from labler.server import app
 from labler.environ import env
 
@@ -136,6 +137,53 @@ def submit_label_for_claim(claim_id):
         return api_response(400, message=f'bad request: {str(e)}')
 
     return api_response(200)
+
+
+@app.route('/api/overview/project/<project_name>', methods=['GET'])
+def get_overview(project_name):
+    examples = env.db.get_examples(project_name)
+    labels = env.db.get_labels(project_name)
+    output = list()
+
+    labels_by_name = dict()
+    for label in labels:
+        json_label = label.to_dict()
+        del json_label[LabelFields.FILE_NAME]
+        del json_label[LabelFields.FILE_PATH]
+        del json_label[LabelFields.PROJECT_NAME]
+        del json_label[LabelFields.SUBMITTED_AT]
+        del json_label[LabelFields.SUBMITTED_BY]
+
+        if label.file_name not in labels_by_name:
+            labels_by_name[label.file_name] = [json_label]
+        else:
+            labels_by_name[label.file_name].append(json_label)
+
+    for example in examples:
+        try:
+            filename = example.file_name
+            im_parts = filename.split(os.path.sep)[-1].split('.', maxsplit=1)
+            rz_file_name = f'{im_parts[0]}_th.{im_parts[1]}'
+
+            if not os.path.exists(os.path.join(example.file_path, rz_file_name)):
+                continue
+
+            labels_for_image = list()
+            if filename in labels_by_name.keys():
+                labels_for_image = labels_by_name[filename]
+
+            b64image, width, height = env.imager.load_b64_and_dims(example.file_path, rz_file_name)
+            output.append({
+                'base64': b64image,
+                'width': width,
+                'height': height,
+                'labels': labels_for_image
+            })
+        except Exception as e:
+            logger.error(f'could not get thumbnail: {str(e)}')
+            logger.exception(e)
+
+    return api_response(code=200, data=output)
 
 
 @app.route('/api/projects', methods=['GET'])
