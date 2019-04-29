@@ -121,7 +121,11 @@ class DataHandler(IDataHandler):
         app.printer.blanknotice('')
         to_resize = list()
 
-        for filename in tqdm(files, desc='finding data'):
+        for filename in tqdm(
+                files,
+                desc='finding data',
+                bar_format="{desc:<20}{percentage:3.0f}%|{bar}{r_bar}"
+        ):
             if filename is None:
                 continue
             if os.path.isdir(filename):
@@ -144,11 +148,23 @@ class DataHandler(IDataHandler):
                     print(traceback.format_exc())
                 continue
 
-            to_resize.append(filename)
-
             if current_idx % 100 == 0:
                 self.env.db.add_examples(project_name, app, batch)
                 batch = list()
+
+            output_dir = app.lambdaenv.output
+            im_parts = filename.split(os.path.sep)[-1].split('.', maxsplit=1)
+            rz_file_name = f'{im_parts[0]}_th.{im_parts[1]}'
+            rz_name = rz_file_name.split(os.path.sep)[-1]
+            output_file = os.path.join(output_dir, rz_name)
+
+            if os.path.exists(output_file):
+                if not app.lambdaenv.overwrite:
+                    app.printer.notice(
+                        f'thumbnail {rz_name} already exists, skipping (overwrite with --overwrite/-o)')
+                    continue
+
+            to_resize.append(filename)
 
         if len(batch) > 0:
             self.env.db.add_examples(project_name, app, batch)
@@ -158,8 +174,17 @@ class DataHandler(IDataHandler):
         return current_idx
 
     def resize(self, app: AppSession, to_resize: list):
+        if len(to_resize) == 0:
+            app.printer.notice('no images to resize, empty list')
+            return
+
         with Pool(app.lambdaenv.cores) as p:
-            rz_file_names = list(tqdm(p.imap(_resize, to_resize), total=len(to_resize), desc='creating thumbnails'))
+            rz_file_names = list(tqdm(
+                p.imap(_resize, to_resize),
+                total=len(to_resize),
+                desc='creating thumbs',
+                bar_format="{desc:<20}{percentage:3.0f}%|{bar}{r_bar}"
+            ))
 
         output_dir = app.lambdaenv.output
         if len(rz_file_names) == 0 or output_dir is None:
