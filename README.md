@@ -2,6 +2,8 @@
 
 Cooperative labeling of training data.
 
+Docs [hosted on Github](https://thenetcircle.github.io/coop-labler/).
+
 ![Project Types](docs/project-types.png)
 
 ## CLI tool to create/manage projects
