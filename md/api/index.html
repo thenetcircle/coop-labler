@@ -63,7 +63,19 @@
     <a class="current" href="./">API</a>
     <ul class="subnav">
             
-    <li class="toctree-l2"><a href="#api">API</a></li>
+    <li class="toctree-l2"><a href="#list-projects">List projects</a></li>
+    
+
+    <li class="toctree-l2"><a href="#claim-examples-to-label">Claim examples to label</a></li>
+    
+
+    <li class="toctree-l2"><a href="#get-image-for-claim">Get image for claim</a></li>
+    
+
+    <li class="toctree-l2"><a href="#submit-labels-for-a-claim">Submit labels for a claim</a></li>
+    
+
+    <li class="toctree-l2"><a href="#project-overview">Project overview</a></li>
     
 
     </ul>
@@ -111,8 +123,153 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="api">API</h1>
-<p>TODO</p>
+                <h2 id="list-projects">List projects</h2>
+<p>Request:</p>
+<p><code>curl localhost:4343/api/v1/projects</code></p>
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: [{
+        &quot;classes&quot;: 3,
+        &quot;created&quot;: &quot;2019-04-16T07:46:22Z&quot;,
+        &quot;directory&quot;: &quot;/data/dw/images/2019&quot;,
+        &quot;finished&quot;: &quot;&quot;,
+        &quot;id&quot;: 1,
+        &quot;project_name&quot;: &quot;some-project-name&quot;,
+        &quot;project_type&quot;: &quot;localization&quot;
+    }],
+    &quot;message&quot;: &quot;&quot;,
+    &quot;status_code&quot;: 200
+}
+</code></pre>
+
+<h2 id="claim-examples-to-label">Claim examples to label</h2>
+<p>Calling this endpoint will return up to 10 claims. Calling this api twice without 
+labeling any of the claims will return the same 10 claims. If a user labels e.g. 2
+of these claims, then call this api again, the remaining 8 claims plus 2 new claims
+will be returned (if there are any remaining unclaimed examples).</p>
+<p>Request:</p>
+<p><code>curl localhost:4343/api/v1/claim/project/<b><i>some-project-name</i></b>/user/<b><i>a-user</i></b></code></p>
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: [{
+        &quot;claimed_at&quot;: &quot;2019-04-30T01:49:25Z&quot;,
+        &quot;claimed_by&quot;: &quot;a-user&quot;,
+        &quot;file_name&quot;: &quot;10033.jpg&quot;,
+        &quot;file_path&quot;: &quot;/data/dw/images/2019&quot;,
+        &quot;id&quot;: 21,
+        &quot;project_name&quot;: &quot;some-project-name&quot;,
+        &quot;status&quot;: &quot;waiting&quot;
+    }, {
+    // [...]
+    }, {
+        &quot;claimed_at&quot;: &quot;2019-04-17T07:38:04Z&quot;,
+        &quot;claimed_by&quot;: &quot;a-user&quot;,
+        &quot;file_name&quot;: &quot;cars.jpg&quot;,
+        &quot;file_path&quot;: &quot;/tmp&quot;,
+        &quot;id&quot;: 9,
+        &quot;project_name&quot;: &quot;some-project-name&quot;,
+        &quot;status&quot;: &quot;waiting&quot;
+    }],
+    &quot;message&quot;: &quot;&quot;,
+    &quot;status_code&quot;: 200
+}
+</code></pre>
+
+<h2 id="get-image-for-claim">Get image for claim</h2>
+<p>The image data is returned in base64 encoding.</p>
+<p>Request:</p>
+<p><code>curl localhost:4343/api/v1/image/<b><i>claim_id</i></b></code></p>
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: {
+        &quot;base64&quot;: &quot;/9j/4AAQSkZJ[...]w2H7vFFFMR/9k=&quot;,
+        &quot;height&quot;: 500,
+        &quot;width&quot;: 960
+    },
+    &quot;message&quot;: &quot;&quot;,
+    &quot;status_code&quot;: 200
+}
+</code></pre>
+
+<h2 id="submit-labels-for-a-claim">Submit labels for a claim</h2>
+<p>Data:</p>
+<pre><code class="json">{
+    &quot;project_type&quot;: &quot;localization&quot;,
+    &quot;labels&quot;: [{
+        &quot;xmin&quot;: 12,
+        &quot;xmax&quot;: 90,
+        &quot;ymin&quot;: 210,
+        &quot;ymax&quot;: 280,
+        &quot;target_class&quot;: &quot;dog&quot;
+    }]
+}
+</code></pre>
+
+<p>Request:</p>
+<pre><code class="bash">curl -X POST \
+    -H 'Content-Type: application/json' \
+    localhost:4343/api/v1/submit/&lt;claim_id&gt; \
+    -d @data.json
+</code></pre>
+
+<p>Or: </p>
+<pre><code class="bash">curl -X POST \
+    -H 'Content-Type: application/json' \
+    localhost:4343/api/v1/submit/&lt;claim_id&gt; \
+    -d '{&quot;project_type&quot;:&quot;localization&quot;,&quot;labels&quot;:[{&quot;xmin&quot;:12,&quot;xmax&quot;:90,&quot;ymin&quot;:210,&quot;ymax&quot;:280,&quot;target_class&quot;:&quot;dog&quot;}]}'
+</code></pre>
+
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: {},
+    &quot;message&quot;: &quot;&quot;,
+    &quot;status_code&quot;: 200
+}
+</code></pre>
+
+<h2 id="project-overview">Project overview</h2>
+<p>Overview returns a list of labeled examples and a list of unlabeled examples. Each image is a 500x500 px 
+thumbnail, where the label coordinates are positions on the full sized image, not the thumbnail.</p>
+<p>Request:</p>
+<p><code>curl localhost:4343/api/v1/overview/project/&lt;b&gt;&lt;i&gt;some-project-name&lt;/i&gt;&lt;/b&gt;</code></p>
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: {
+        &quot;done&quot;: [{
+            &quot;base64&quot;: &quot;/9j/4SkZJ[...]NFWLP/9k=&quot;,
+            &quot;height&quot;: 500,
+            &quot;width&quot;: 500,
+            &quot;labels&quot;: [{
+                &quot;id&quot;: 10,
+                &quot;status&quot;: &quot;finished&quot;,
+                &quot;target_class&quot;: &quot;dog&quot;,
+                &quot;xmax&quot;: 592,
+                &quot;xmin&quot;: 399,
+                &quot;ymax&quot;: 538,
+                &quot;ymin&quot;: 263
+            }, 
+            // [...]
+            {
+                &quot;id&quot;: 11,
+                &quot;status&quot;: &quot;finished&quot;,
+                &quot;target_class&quot;: &quot;cat&quot;,
+                &quot;xmax&quot;: 791,
+                &quot;xmin&quot;: 625,
+                &quot;ymax&quot;: 520,
+                &quot;ymin&quot;: 262
+            }]
+        }],
+        &quot;remaining&quot;: [{
+            &quot;base64&quot;: &quot;/9j/4AA[...]P/9k=&quot;,
+            &quot;height&quot;: 500,
+            &quot;width&quot;: 500,
+            &quot;labels&quot;: []
+        }]
+    },
+    &quot;message&quot;: &quot;&quot;,
+    &quot;status_code&quot;: 200
+}
+</code></pre>
               
             </div>
           </div>
