@@ -92,6 +92,9 @@ def op_add(app: AppSession, args):
     if data_dir is None:
         raise FatalException('no data directory supplied when suing add command')
 
+    if app.lambdaenv.output is None:
+        app.lambdaenv.output = data_dir
+
     if not os.path.exists(data_dir):
         raise errors.FatalException(f'data dir "{data_dir}" does not exist')
 
