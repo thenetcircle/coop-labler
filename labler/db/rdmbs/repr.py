@@ -173,7 +173,7 @@ class LabelRepr(object):
             file_path: str = None,
             file_name: str = None,
             project_name: str = None,
-            target_class: int = None,
+            target_class: str = None,
             submitted_by: str = None,
             submitted_at: datetime = None,
             status: str = None,

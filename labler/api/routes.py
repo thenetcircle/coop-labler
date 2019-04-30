@@ -45,12 +45,12 @@ def api_response(code, data: Union[dict, List[dict]] = None, message: Union[dict
     }), code
 
 
-@app.route('/api/', methods=['GET'])
+@app.route('/api/v1/', methods=['GET'])
 def index():
     return api_response(code=200)
 
 
-@app.route('/api/claims/user/<user>', methods=['GET'])
+@app.route('/api/v1/claims/user/<user>', methods=['GET'])
 def claims_for_user(user):
     claims = env.db.get_claims(name=None, user=user)
     claims_json = [claim.to_dict() for claim in claims]
@@ -58,31 +58,7 @@ def claims_for_user(user):
     return api_response(code=200, data=claims_json)
 
 
-@app.route('/api/claims/project/<project>', methods=['GET'])
-def claims_for_project(project):
-    claims = env.db.get_claims(name=project, user=None)
-    claims_json = [claim.to_dict() for claim in claims]
-
-    return api_response(code=200, data=claims_json)
-
-
-@app.route('/api/claims/project/<project>/user/<user>', methods=['GET'])
-def claims_for_project_and_user(project, user):
-    claims = env.db.get_claims(name=project, user=user)
-    claims_json = [claim.to_dict() for claim in claims]
-
-    return api_response(code=200, data=claims_json)
-
-
-@app.route('/api/claims', methods=['GET'])
-def all_claims():
-    claims = env.db.get_claims(name=None, user=None)
-    claims_json = [claim.to_dict() for claim in claims]
-
-    return api_response(code=200, data=claims_json)
-
-
-@app.route('/api/claim/project/<project>/user/<user>', methods=['GET'])
+@app.route('/api/v1/claim/project/<project>/user/<user>', methods=['GET'])
 def claim_new_labels(project, user):
     claims = env.claimer.claim(project=project, user=user)
     claims_json = [claim.to_dict() for claim in claims]
@@ -90,7 +66,7 @@ def claim_new_labels(project, user):
     return api_response(code=200, data=claims_json)
 
 
-@app.route('/api/submit/<claim_id>', methods=['POST'])
+@app.route('/api/v1/submit/<claim_id>', methods=['POST'])
 def submit_label_for_claim(claim_id):
     if claim_id is None or len(claim_id) == 0:
         return api_response(400, message='blank claim id in submission')
@@ -139,7 +115,7 @@ def submit_label_for_claim(claim_id):
     return api_response(200)
 
 
-@app.route('/api/overview/project/<project_name>', methods=['GET'])
+@app.route('/api/v1/overview/project/<project_name>', methods=['GET'])
 def get_overview(project_name):
     examples = env.db.get_examples(project_name)
     labels = env.db.get_labels(project_name)
@@ -196,7 +172,7 @@ def get_overview(project_name):
     return api_response(code=200, data=output)
 
 
-@app.route('/api/projects', methods=['GET'])
+@app.route('/api/v1/projects', methods=['GET'])
 def list_projects():
     projects = env.db.get_projects()
     projects_json = [project.to_dict() for project in projects]
@@ -204,7 +180,7 @@ def list_projects():
     return api_response(code=200, data=projects_json)
 
 
-@app.route('/api/image/<claim_id>', methods=['GET'])
+@app.route('/api/v1/image/<claim_id>', methods=['GET'])
 def get_image_b64(claim_id):
     claim = env.db.get_claim(claim_id)
     if claim is None:

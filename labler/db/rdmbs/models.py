@@ -107,7 +107,7 @@ class Labels(DeclarativeBase):
     file_name = Column('file_name', String(256), nullable=False, index=True, unique=False)
     project_name = Column('project_name', String(256), nullable=False, index=True, unique=False)
 
-    target_class = Column('target_class', Integer, nullable=True, index=False, unique=False)
+    target_class = Column('target_class', String(128), nullable=True, index=False, unique=False)
     submitted_by = Column('submitted_by', String(128), nullable=True, index=False, unique=False)
     submitted_at = Column('submitted_at', DateTime, nullable=False, server_default=utcnow())
 
