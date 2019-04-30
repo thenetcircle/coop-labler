@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 from typing import List, Union, Tuple, Set
 
@@ -51,7 +52,7 @@ class DatabaseRdbms(IDatabase):
         if project is None:
             raise errors.FatalException(f'no project exist for name {project_name}')
 
-        return set(project.directory.split(';'))
+        return set([directory.rstrip(os.path.sep) for directory in project.directory.split(';')])
 
     @with_session
     def add_examples(
