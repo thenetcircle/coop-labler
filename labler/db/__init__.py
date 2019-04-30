@@ -41,6 +41,12 @@ class IDatabase(ABC):
     def get_labels(self, project_name) -> List[LabelRepr]:
         raise NotImplementedError()
 
+    def get_labels_for_example(self, project_name: str, file_path: str, file_name: str) -> List[LabelRepr]:
+        raise NotImplementedError()
+
+    def remove_label(self, label_id: int) -> None:
+        raise NotImplementedError()
+
     def get_projects(self) -> List[ProjectRepr]:
         raise NotImplementedError()
 

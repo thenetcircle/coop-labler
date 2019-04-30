@@ -15,8 +15,14 @@
     span#arrow-help 
       b User the arrow keys to change image.
       
-    div#image-current
-      img
+    div
+      div#image-current(width='50%', style='float: left;')
+        img
+      
+      div#image-labels(width='50%', style='float: left;')
+        b Labels for image
+        div#labels
+          i asdf
       
     canvas#labler(v-labler)
 </template>
@@ -129,7 +135,7 @@
             console.log(body)
 
             // TODO: only submit when changing picture, IF any labels have changed
-            fetch('http://localhost:4343/api/submit/' + vself.currentClaimId, {
+            fetch('http://localhost:4343/api/v1/submit/' + vself.currentClaimId, {
               method: 'post',
               body: JSON.stringify(body),
               headers: {
@@ -184,7 +190,7 @@
       fetchImage(claimId) {
         const self = this
 
-        fetch('http://localhost:4343/api/image/' + claimId)
+        fetch('http://localhost:4343/api/v1/image/' + claimId)
           .then((response) => {
               if (response.status !== 200) {
                 console.log('Looks like there was a problem. Status Code: ' +
@@ -196,10 +202,12 @@
                 const base64Key = 'base64'
                 const heightKey = 'height'
                 const widthKey = 'width'
+                const labelsKey = 'labels'
                 const img = document.querySelector('img')
                 const labler = document.getElementById('labler')
                 const width = data.data[widthKey]
                 const height = data.data[heightKey]
+                const imgLabels = data.data[labelsKey]
                 self.resizeRatio = 600 / height
 
                 img.src = self.base64Flag + data.data[base64Key]
@@ -215,6 +223,19 @@
 
                 // TODO: for some reason the image shifts 64px up after checking where it is
                 labler.style.top = (rect.top - 64) + 'px'
+
+                const labels = document.getElementById('labels')
+                while (labels.firstChild) {
+                    labels.removeChild(labels.firstChild);
+                }
+
+                console.log(data)
+                for (var i = 0; i < imgLabels.length; i++) {
+                  const labelSpan = document.createElement('span');
+                  var text = document.createTextNode(imgLabels[i].xmin + '<br />');
+                  labelSpan.appendChild(text);
+                  labels.appendChild(labelSpan);
+                }
               })
             },
           )
@@ -226,7 +247,7 @@
       fetchClaims(projectName, userName) {
         const self = this
 
-        fetch('http://localhost:4343/api/claim/project/' + projectName + '/user/' + userName)
+        fetch('http://localhost:4343/api/v1/claim/project/' + projectName + '/user/' + userName)
           .then((response) => {
               if (response.status !== 200) {
                 console.log('Looks like there was a problem. Status Code: ' +
@@ -279,7 +300,7 @@
         }
       })
 
-      fetch('http://localhost:4343/api/projects')
+      fetch('http://localhost:4343/api/v1/projects')
         .then((response) => {
             if (response.status !== 200) {
               console.log('Looks like there was a problem. Status Code: ' +

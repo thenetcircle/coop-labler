@@ -1,3 +1,4 @@
+import logging
 import os
 from functools import wraps
 from typing import List, Union, Tuple, Set
@@ -33,6 +34,7 @@ class DatabaseRdbms(IDatabase):
 
     def __init__(self, env: GNEnvironment):
         self.env = env
+        self.logger = logging.getLogger(__name__)
         DatabaseRdbms.db = Database(env)
 
     @with_session
@@ -204,6 +206,34 @@ class DatabaseRdbms(IDatabase):
             .all()
 
         return [label.to_repr() for label in labels]
+
+    @with_session
+    def get_labels_for_example(
+            self,
+            project_name: str,
+            file_path: str,
+            file_name: str,
+            session=None
+    ) -> List[LabelRepr]:
+        labels = session.query(Labels)\
+            .filter_by(file_path=file_path)\
+            .filter_by(file_name=file_name)\
+            .filter_by(project_name=project_name)\
+            .all()
+
+        return [label.to_repr() for label in labels]
+
+    @with_session
+    def remove_label(self, label_id: int, session=None) -> None:
+        try:
+            label = session.query(Labels).get(label_id)
+            if label is None:
+                return
+
+            session.delete(label)
+            session.commit()
+        except Exception as e:
+            self.logger.error(f'could not remove label with ID "{label_id}": {str(e)}')
 
     @with_session
     def get_projects(self, session=None) -> List[ProjectRepr]:

@@ -193,8 +193,26 @@ def get_image_b64(claim_id):
         logger.exception(e)
         return api_response(code=500, message='could not load image for claim')
 
+    labels = env.db.get_labels_for_example(claim.project_name, claim.file_path, claim.file_name)
+    json_labels = list()
+    for label in labels:
+        json_labels.append({
+            LabelFields.ID: label.id,
+            LabelFields.XMIN: label.xmin,
+            LabelFields.XMAX: label.xmax,
+            LabelFields.YMIN: label.ymin,
+            LabelFields.YMAX: label.ymax,
+            LabelFields.TARGET_CLASS: label.target_class
+        })
+
     return api_response(code=200, data={
         'base64': b64image,
+        'labels': json_labels,
         'width': width,
         'height': height
     })
+
+@app.route('/api/v1/label/<label_id>', methods=['DELETE'])
+def delete_label(label_id):
+    env.db.remove_label(label_id)
+    return api_response(code=200)
