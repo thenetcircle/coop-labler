@@ -212,7 +212,12 @@ def get_image_b64(claim_id):
         'height': height
     })
 
+
 @app.route('/api/v1/label/<label_id>', methods=['DELETE'])
 def delete_label(label_id):
-    env.db.remove_label(label_id)
-    return api_response(code=200)
+    try:
+        env.db.remove_label(label_id)
+        return api_response(code=200)
+    except Exception as e:
+        return api_response(code=400, message=str(e))
+

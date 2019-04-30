@@ -225,15 +225,12 @@ class DatabaseRdbms(IDatabase):
 
     @with_session
     def remove_label(self, label_id: int, session=None) -> None:
-        try:
-            label = session.query(Labels).get(label_id)
-            if label is None:
-                return
+        label = session.query(Labels).get(label_id)
+        if label is None:
+            return
 
-            session.delete(label)
-            session.commit()
-        except Exception as e:
-            self.logger.error(f'could not remove label with ID "{label_id}": {str(e)}')
+        session.delete(label)
+        session.commit()
 
     @with_session
     def get_projects(self, session=None) -> List[ProjectRepr]:
