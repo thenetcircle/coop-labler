@@ -190,6 +190,10 @@ class DataHandler(IDataHandler):
         if len(rz_file_names) == 0 or output_dir is None:
             return
 
+        if app.lambdaenv.directory == app.lambdaenv.output:
+            # no need to move
+            return
+
         for rz_file_name in rz_file_names:
             rz_name = rz_file_name.split(os.path.sep)[-1]
             output_file = os.path.join(output_dir, rz_name)
