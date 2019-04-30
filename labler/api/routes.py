@@ -219,5 +219,5 @@ def delete_label(label_id):
         env.db.remove_label(label_id)
         return api_response(code=200)
     except Exception as e:
+        logger.error(f'could not delete label with ID {label_id}: {str(e)}')
         return api_response(code=400, message=str(e))
-
