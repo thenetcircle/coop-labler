@@ -68,6 +68,21 @@
     <a class="current" href="./">CLI</a>
     <ul class="subnav">
             
+    <li class="toctree-l2"><a href="#listing-projects">Listing projects</a></li>
+    
+
+    <li class="toctree-l2"><a href="#listing-examples">Listing examples</a></li>
+    
+
+    <li class="toctree-l2"><a href="#creating-a-new-project">Creating a new project</a></li>
+    
+
+    <li class="toctree-l2"><a href="#adding-training-data-to-a-project">Adding training data to a project</a></li>
+    
+
+    <li class="toctree-l2"><a href="#syncing-examples-with-file-system">Syncing examples with file system</a></li>
+    
+
     </ul>
 	    </li>
           
@@ -108,7 +123,50 @@
           <div role="main">
             <div class="section">
               
-                <p>TODO</p>
+                <h2 id="listing-projects">Listing projects</h2>
+<pre><code>$ labler projects
+[-] listing projects
+
+    project name        project type        classes             directory
+    ---------------------------------------------------------------------
+    some-project-name   localization        3                   /data/dw/images/2019
+</code></pre>
+
+<h2 id="listing-examples">Listing examples</h2>
+<pre><code>$ labler examples some-project-name
+[-] listing examples for project some-project-name
+
+    width               height              file path                                file name
+    ------------------------------------------------------------------------------------------
+    433                 768                 /data/dw/images/2019                     10044.jpg
+    1024                768                 /data/dw/images/2019                     10003.jpg
+    1024                576                 /data/dw/images/2019                     10090.jpg
+    432                 768                 /data/dw/images/2019                     10023.jpg
+    433                 768                 /data/dw/images/2019                     10064.jpg
+</code></pre>
+
+<h2 id="creating-a-new-project">Creating a new project</h2>
+<pre><code>$ .labler create my-new-project-name --type localization --classes 2 --dir /data
+[-] creating project: my-new-project-name
+</code></pre>
+
+<h2 id="adding-training-data-to-a-project">Adding training data to a project</h2>
+<pre><code>$ labler add my-new-project-name --dir /data/dw/images/2019 --cores 6
+[-] adding directly &quot;/data/dw/images/2019&quot; to project: my-new-project-name
+
+finding data        100%|███████████████████████████████████████████████████████| 94/94 [00:00&lt;00:00, 5822.93it/s]
+creating thumbs     100%|█████████████████████████████████████████████████████████| 94/94 [00:12&lt;00:00,  7.55it/s]
+</code></pre>
+
+<h2 id="syncing-examples-with-file-system">Syncing examples with file system</h2>
+<p>Remove examples from db if they no longer exist on the file system.</p>
+<pre><code>$ rm /data/dw/images/2019/10007.jpg
+$ rm /data/dw/images/2019/10008.jpg
+$ ./bin/labler sync my-new-project-name
+[-] syncing project: my-new-project-name
+[!] example for /data/dw/images/2019/10007.jpg does not exist, disabling
+[!] example for /data/dw/images/2019/10008.jpg does not exist, disabling
+</code></pre>
               
             </div>
           </div>
