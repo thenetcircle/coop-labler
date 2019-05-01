@@ -115,11 +115,20 @@ class DatabaseRdbms(IDatabase):
     @with_session
     def disable_example(self, example: ExampleRepr, session=None) -> None:
         example = session.query(Examples).filter_by(id=example.id).first()
-        if example is None:
-            return
+        if example is not None:
+            example.disabled = True
+            session.add(example)
 
-        example.disabled = True
-        session.add(example)
+        claims = session.query(Claims)\
+            .filter_by(project_name=example.project_name)\
+            .filter_by(file_path=example.file_path)\
+            .filter_by(file_name=example.file_name)\
+            .all()
+
+        if claims is not None and len(claims) > 0:
+            for claim in claims:
+                session.delete(claim)
+
         session.commit()
 
     @with_session
