@@ -125,9 +125,19 @@ class DatabaseRdbms(IDatabase):
             .filter_by(file_name=example.file_name)\
             .all()
 
+        labels = session.query(Labels)\
+            .filter_by(project_name=example.project_name)\
+            .filter_by(file_path=example.file_path)\
+            .filter_by(file_name=example.file_name)\
+            .all()
+
         if claims is not None and len(claims) > 0:
             for claim in claims:
                 session.delete(claim)
+
+        if labels is not None and len(labels) > 0:
+            for label in labels:
+                session.delete(label)
 
         session.commit()
 
