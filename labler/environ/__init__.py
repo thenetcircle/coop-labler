@@ -26,7 +26,13 @@ def create_env(gn_environment, quiet=False):
     from labler.data.handler import DataHandler
     from labler.db.rdmbs.manager import DatabaseRdbms
 
-    gn_env = gnenv.environ.create_env(gn_environment=gn_environment, quiet=quiet)
+    config_path = '/etc/labler/'
+    gn_env = gnenv.environ.create_env(
+        config_path=config_path,
+        gn_environment=gn_environment,
+        secrets_path=config_path + 'secrets/',
+        quiet=quiet
+    )
     lb_env = LablerEnvironment(gn_env)
     lb_env.db = DatabaseRdbms(lb_env)
     lb_env.claimer = Claimer(lb_env)

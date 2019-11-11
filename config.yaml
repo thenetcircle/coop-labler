@@ -7,3 +7,4 @@ database:
   username: '$DB_USER'
   password: '$DB_PASS'
   pool_size: 10
+secrets_path: '/etc/labler/secrets/'
