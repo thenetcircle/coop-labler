@@ -18,6 +18,11 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'labler = labler.cli:entrypoint',
+        ],
+    },
     install_requires=[
         'codecov',
         'coverage',
