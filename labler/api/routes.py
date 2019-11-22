@@ -32,7 +32,7 @@ def is_blank(s: str):
     return s is None or len(s.strip()) == 0
 
 
-def api_response(code, data: Union[dict, List[dict]] = None, message: Union[dict, str] = None):
+def api_response(code, data: Union[dict, List[dict], List[str]] = None, message: Union[dict, str] = None):
     if data is None:
         data = dict()
     if message is None:
@@ -116,10 +116,9 @@ def submit_label_for_claim(claim_id):
 
 
 @app.route('/api/v1/labels/project/<project_name>', methods=['GET'])
-def get_overview(project_name):
-    labels = env.db.get_unqiue_labels(project_name)
-
-    return api_response(code=200, data=output)
+def get_labels(project_name):
+    labels = env.db.get_unique_labels(project_name)
+    return api_response(code=200, data=labels)
 
 
 @app.route('/api/v1/overview/project/<project_name>', methods=['GET'])

@@ -128,6 +128,14 @@ Response:
 }
 ```
 
+## Unique labels for project
+
+Returns a list of unique labels for a project.
+
+Request:
+
+`curl localhost:4343/api/v1/labels/project/<b><i>some-project-name</i></b>`
+
 ## Project overview
 
 Overview returns a list of labeled examples and a list of unlabeled examples. Each image is a 500x500 px 
