@@ -75,6 +75,9 @@
     <li class="toctree-l2"><a href="#submit-labels-for-a-claim">Submit labels for a claim</a></li>
     
 
+    <li class="toctree-l2"><a href="#unique-labels-for-project">Unique labels for project</a></li>
+    
+
     <li class="toctree-l2"><a href="#project-overview">Project overview</a></li>
     
 
@@ -224,6 +227,21 @@ will be returned (if there are any remaining unclaimed examples).</p>
     &quot;data&quot;: {},
     &quot;message&quot;: &quot;&quot;,
     &quot;status_code&quot;: 200
+}
+</code></pre>
+
+<h2 id="unique-labels-for-project">Unique labels for project</h2>
+<p>Returns a list of unique labels for a project.</p>
+<p>Request:</p>
+<p><code>curl localhost:4343/api/v1/labels/project/&lt;b&gt;&lt;i&gt;some-project-name&lt;/i&gt;&lt;/b&gt;</code></p>
+<p>Response:</p>
+<pre><code class="json">{
+    &quot;data&quot;: [
+        &quot;cat&quot;,
+        &quot;dog&quot;
+    ],
+    &quot;message&quot;:&quot;&quot;,
+    &quot;status_code&quot;:200
 }
 </code></pre>
 
