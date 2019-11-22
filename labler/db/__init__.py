@@ -38,6 +38,9 @@ class IDatabase(ABC):
     def get_claims(self, name=None, user=None) -> List[ClaimRepr]:
         raise NotImplementedError()
 
+    def get_unique_labels(self, project_name) -> List[LabelRepr]:
+        raise NotImplementedError()
+
     def get_labels(self, project_name) -> List[LabelRepr]:
         raise NotImplementedError()
 

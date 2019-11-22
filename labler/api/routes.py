@@ -115,6 +115,13 @@ def submit_label_for_claim(claim_id):
     return api_response(200)
 
 
+@app.route('/api/v1/labels/project/<project_name>', methods=['GET'])
+def get_overview(project_name):
+    labels = env.db.get_unqiue_labels(project_name)
+
+    return api_response(code=200, data=output)
+
+
 @app.route('/api/v1/overview/project/<project_name>', methods=['GET'])
 def get_overview(project_name):
     examples = env.db.get_examples(project_name)

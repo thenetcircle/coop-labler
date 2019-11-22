@@ -26,6 +26,7 @@ LambdaTemplate = {
     'project_type': None,
     'directory': None,
     'overwrite': False,
+    'unique': False,
 }
 
 
@@ -36,13 +37,14 @@ class AppSession:
         try:
             opts, argv = getopt.gnu_getopt(
                 argv,
-                'pVsvohc:t:d:C:O:',
+                'pVsvohuc:t:d:C:O:',
                 [
                     'pretend',
                     'version',
                     'silent',
                     'verbose',
                     'overwrite',
+                    'unique',
                     'help',
                     'classes=',
                     'type=',
@@ -91,6 +93,9 @@ class AppSession:
             elif opt in ('-v', '--verbose'):
                 self.lambdaenv.verbose = True
                 self.lambdaenv.suppressed = set()
+
+            elif opt in ('-u', '--unique'):
+                self.lambdaenv.unique = True
 
             elif opt in ('-C', '--cores'):
                 try:
@@ -161,6 +166,8 @@ def usage():
                 Overwrites output files when exporting if they already exist.
             --classes (or -c):
                 Specify how many classes a project has.
+            --unique (or -u):
+                Unique values only.
             --cores (or -C):
                 Number of CPU cores to use when processing training data.
             --dir (or -d):

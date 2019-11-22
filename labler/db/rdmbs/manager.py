@@ -219,6 +219,18 @@ class DatabaseRdbms(IDatabase):
         return self._get_claims_for_user(user)
 
     @with_session
+    def get_unique_labels(self, project_name, session=None) -> List[LabelRepr]:
+        labels = session.query(Labels.target_class)\
+            .filter_by(project_name=project_name)\
+            .distinct()\
+            .all()
+
+        if not labels:
+            return list()
+
+        return [label[0] for label in labels]
+
+    @with_session
     def get_labels(self, project_name, session=None) -> List[LabelRepr]:
         labels = session.query(Labels)\
             .filter_by(project_name=project_name)\

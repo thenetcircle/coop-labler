@@ -213,14 +213,24 @@ def op_labels(app: AppSession, args):
     if not env.db.project_exists(name):
         raise FatalException(f'no project exist with name {name}')
 
-    app.printer.action(f'listing labels for project {name}')
-    labels = env.db.get_labels(name)
+    if app.lambdaenv.unique:
+        app.printer.action(f'listing unque labels for project {name}')
+        labels = env.db.get_unique_labels(name)
+        header = 'label'
+    else:
+        app.printer.action(f'listing labels for project {name}')
+        labels = env.db.get_labels(name)
+        header = 'file name \txmin \txmax \tymin \tymax \tsubmitted by \tsubmitted at'.expandtabs(tabsize=18)
 
     app.printer.blanknotice('')
-    header = 'file name \txmin \txmax \tymin \tymax \tsubmitted by \tsubmitted at'.expandtabs(tabsize=18)
 
     app.printer.blanknotice(header)
     app.printer.blanknotice('-' * len(header))
+
+    if app.lambdaenv.unique:
+        for label in labels:
+            app.printer.blanknotice(label)
+        return
 
     for label in labels:
         label_json = label.to_dict()
