@@ -136,6 +136,19 @@ Request:
 
 `curl localhost:4343/api/v1/labels/project/<b><i>some-project-name</i></b>`
 
+Response:
+
+```json
+{
+    "data": [
+        "cat",
+        "dog"
+    ],
+    "message":"",
+    "status_code":200
+}
+```
+
 ## Project overview
 
 Overview returns a list of labeled examples and a list of unlabeled examples. Each image is a 500x500 px 
