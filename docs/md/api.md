@@ -31,7 +31,7 @@ will be returned (if there are any remaining unclaimed examples).
 
 Request:
 
-<code>curl localhost:4343/api/v1/claim/project/<b><i>some-project-name</i></b>/user/<b><i>a-user</i></b></code>
+<code>curl localhost:4343/api/v1/claim/project/some-project-name/user/<b><i>a-user</i></b></code>
 
 Response:
 
@@ -134,7 +134,7 @@ Returns a list of unique labels for a project.
 
 Request:
 
-`curl localhost:4343/api/v1/labels/project/<b><i>some-project-name</i></b>`
+`curl localhost:4343/api/v1/labels/project/some-project-name`
 
 Response:
 
@@ -156,7 +156,7 @@ thumbnail, where the label coordinates are positions on the full sized image, no
 
 Request:
 
-`curl localhost:4343/api/v1/overview/project/<b><i>some-project-name</i></b>`
+`curl localhost:4343/api/v1/overview/project/some-project-name`
 
 Response:
 
